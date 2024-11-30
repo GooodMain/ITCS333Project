@@ -23,8 +23,9 @@
  ROOM BOOKING</h4>
     <nav class="white z-depth-0" class="grey-lighten-4">
         
-<ul id="nav-mobile" class="right hide-on-small-and-down">            
-                <li><a href="home.php" class="btn brand z-depth-0">home </a></li>
+<ul id="nav-mobile" class="right hide-on-small-and-down">   
+<li><a href="index.php" class="btn brand z-depth-0">home </a></li>
+                <li><a href="rooms.php" class="btn brand z-depth-0">rooms </a></li>
                 <li><a href="bookings.php" class="btn brand z-depth-0">bookings </a></li>
                 <li><a href="profile.php" class="btn brand z-depth-0">profile </a></li>
                 <li><a href="reports.php" class="btn brand z-depth-0">reports </a></li>
