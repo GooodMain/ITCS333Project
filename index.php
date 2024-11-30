@@ -34,29 +34,18 @@ $userFullName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : 'Unknown 
 </head>
 
 <body>
-    <nav>
-        <div>
-            <h1>Room Booking System</h1>
-            <div>
-                <ul>
-                    <li>
-                        <a href="logout.php">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+<?php include("header.php"); ?>
 
     <div>
         <h2>Welcome to the IT College</h2>
         <p>Hello, <strong><?= htmlspecialchars($userFullName) ?></strong><br>You are successfully logged in!</p>
-        <p>This is a protected page that only logged-in users can access.</p>
+        <h3>ABOUT US</h3>
+        <p>This is the IT college  room booking system </p>
+         <p> you can explore our rooms in the ROOMS page </p>
+        
     </div>
 
-    <footer>
-        <p>&copy; <?= date('Y/m/d') ?><br>IT College Room Booking System</p>
-    </footer>
-    
+    <?php include("footer.php"); ?>
 </body>
 
 </html>
