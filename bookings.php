@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bookings</title>
+<body>
+<?php include("header.php"); ?>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+<?php include("footer.php"); ?>
+</body>
+</html>
