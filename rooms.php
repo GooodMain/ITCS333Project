@@ -3,22 +3,19 @@
 session_start();
 
 // Check if the user is logged in
-if (!isset($_SESSION['user'])) 
-{
+if (!isset($_SESSION['user'])) {
     header("Location: login.php"); // Redirect to login page if not logged in
     exit();
 }
 
-
 // Corrected connection details
-$host = 'localhost';          
-$username = 'root';           
-$password = '';               
-$dbname = 'booking_system';   
+$host = 'localhost';
+$username = 'root';
+$password = '';
+$dbname = 'booking_system';
 
 // Establish the connection
 $con = mysqli_connect($host, $username, $password, $dbname);
-
 // Check connection
 if (!$con) {
     die('Connection error: ' . mysqli_connect_error());
@@ -27,11 +24,8 @@ if (!$con) {
 // Query to fetch data from the 'class' table
 $sql = 'SELECT * FROM class_type';
 $result = mysqli_query($con, $sql);
-
 // Fetch and print all records
 $class = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-
 // Free result and close connection
 mysqli_free_result($result);
 mysqli_close($con);
@@ -58,17 +52,18 @@ mysqli_close($con);
                     <div class="card z-depth-0">
                         <div class="card-content center">
                             <h6><?php echo htmlspecialchars($room['type']); ?></h6>
-                            <div><?php echo htmlspecialchars($room['capacity']); ?>
-                                <div><?php echo htmlspecialchars($room['equipments']); ?></div>
-                            </div>
-                            <div class="card-action right-align"></div>
+                            <div>Capacity: <?php echo htmlspecialchars($room['capacity']); ?></div>
+                            <div>Equipments: <?php echo htmlspecialchars($room['equipments']); ?></div>
+                        </div>
+                        <div class="card-action right-align">
                             <a class="brand-text" href="#">Room Details</a>
                         </div>
-                    <?php } ?>
+                    </div>
                 </div>
-            </div>
+            <?php } ?>
         </div>
-        <?php include("footer.php"); ?>
+    </div>
+    <?php include("footer.php"); ?>
 </body>
 
 </html>
