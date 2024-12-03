@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 02, 2024 at 02:35 PM
+-- Generation Time: Dec 02, 2024 at 04:50 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -73,7 +73,6 @@ INSERT INTO `class_type` (`type`, `capacity`, `equipments`) VALUES
 
 CREATE TABLE `room_bookings` (
   `id` int(11) NOT NULL,
-  `room_id` int(11) NOT NULL,
   `start_time` datetime NOT NULL,
   `end_time` datetime NOT NULL,
   `class_id` int(11) NOT NULL,
@@ -139,7 +138,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `room_bookings`
 --
 ALTER TABLE `room_bookings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
