@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Dec 02, 2024 at 04:50 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost
+-- Generation Time: Dec 05, 2024 at 03:02 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -73,6 +73,7 @@ INSERT INTO `class_type` (`type`, `capacity`, `equipments`) VALUES
 
 CREATE TABLE `room_bookings` (
   `id` int(11) NOT NULL,
+  `room_id` int(11) NOT NULL,
   `start_time` datetime NOT NULL,
   `end_time` datetime NOT NULL,
   `class_id` int(11) NOT NULL,
@@ -88,24 +89,26 @@ CREATE TABLE `room_bookings` (
 --
 
 CREATE TABLE `user` (
+  `user_id` int(11) UNSIGNED NOT NULL,
   `email` varchar(100) NOT NULL,
   `fullName` varchar(100) NOT NULL,
   `phoneNum` varchar(15) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `user_type` varchar(10) NOT NULL
+  `user_type` varchar(10) NOT NULL,
+  `picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`email`, `fullName`, `phoneNum`, `password`, `user_type`) VALUES
-('202011514@stu.uob.edu.bh', 'Maryam Husain', '39565657', '$2y$10$99R48JdubD.51zBRuDri6uTMnjEqhcB9718/rIpq5Hy8hMwKd251O', ''),
-('202011585@stu.uob.edu.bh', 'Mohammed Alhusaini', '+973 33414205', '$2y$10$u/rHU4xekWINDFKUitkwdueipn4Od.XZH4FKMHWhnPZ5cGBsLwpWq', ''),
-('202100111@stu.uob.edu.bh', 'pass:123-Admin', '33333333', '123-Admin', 'admin'),
-('202100863@stu.uob.edu.bh', 'ASMA', '32217880', '$2y$10$1eGP1se39abCMzixLxMevu8kRqWXXWymElNAHwnVmfFnS1Xr45Roy', ''),
-('202103399@stu.uob.edu.bh', 'Hussain Salah Mohammed', '39561188', '$2y$10$WXQBVKxRyD2XIhCgMKJIge2Mqbprf.1Ysegx.HCaOb0rMzlrAZg0u', ''),
-('salehmohmd@uob.edu.bh', 'Saleh Mohammed', '0097333695821', '$2y$10$z93bf6mdgNDN9lxGDXA9eORqqIR46OCPuT/TxZ6L6jrg0C37d0PT2', '');
+INSERT INTO `user` (`user_id`, `email`, `fullName`, `phoneNum`, `password`, `user_type`, `picture`) VALUES
+(1, '202011514@stu.uob.edu.bh', 'Maryam Husain', '39565657', '$2y$10$99R48JdubD.51zBRuDri6uTMnjEqhcB9718/rIpq5Hy8hMwKd251O', '', NULL),
+(2, '202011585@stu.uob.edu.bh', 'Mohammed Alhusaini', '+973 33414205', '$2y$10$u/rHU4xekWINDFKUitkwdueipn4Od.XZH4FKMHWhnPZ5cGBsLwpWq', '', NULL),
+(3, '202100111@stu.uob.edu.bh', 'pass:123-Admin', '33333333', '123-Admin', 'admin', NULL),
+(4, '202100863@stu.uob.edu.bh', 'ASMA', '32217880', '$2y$10$1eGP1se39abCMzixLxMevu8kRqWXXWymElNAHwnVmfFnS1Xr45Roy', '', NULL),
+(5, '202103399@stu.uob.edu.bh', 'Hussain Salah Mohammed', '39561188', '$2y$10$WXQBVKxRyD2XIhCgMKJIge2Mqbprf.1Ysegx.HCaOb0rMzlrAZg0u', '', NULL),
+(6, 'salehmohmd@uob.edu.bh', 'Saleh Mohammed', '0097333695821', '$2y$10$z93bf6mdgNDN9lxGDXA9eORqqIR46OCPuT/TxZ6L6jrg0C37d0PT2', '', NULL);
 
 --
 -- Indexes for dumped tables
@@ -128,7 +131,7 @@ ALTER TABLE `room_bookings`
 -- Indexes for table `user`
 --
 ALTER TABLE `user`
-  ADD PRIMARY KEY (`email`);
+  ADD PRIMARY KEY (`user_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -138,7 +141,13 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `room_bookings`
 --
 ALTER TABLE `room_bookings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `user`
+--
+ALTER TABLE `user`
+  MODIFY `user_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
