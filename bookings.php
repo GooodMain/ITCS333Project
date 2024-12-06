@@ -8,43 +8,6 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $selectedDate = $_POST['date'];
-    $selectedTimeSlot = $_POST['time_slot'];
-    $userEmail = $_SESSION['user'];
-    $classType = $_POST['cl_type'];
-
-    // Define available time slots from 10 AM to 6 PM, each slot is 1 hour
-    $timeSlots = [
-        '10:00:00', '11:00:00', '12:00:00', '13:00:00', '14:00:00', '15:00:00', '16:00:00', '17:00:00'
-    ];
-
-    // Calculate start and end time for the selected time slot
-    $startTime = $timeSlots[$selectedTimeSlot];
-    $endTime = date('H:i:s', strtotime($startTime) + 3600);
-    $startDateTime = "$selectedDate $startTime";
-    $endDateTime = "$selectedDate $endTime";
-
-    // Check if the selected time slot is already booked (Conflict checking algorithm)
-    $checkBookingQuery = "SELECT * FROM room_bookings WHERE (start_time < :end_time AND end_time > :start_time) AND cl_type = :cl_type";
-    $db = $pdo->prepare($checkBookingQuery);
-    $db->execute([
-        ':start_time' => $startDateTime,
-        ':end_time' => $endDateTime,
-        ':cl_type' => $classType
-    ]);
-
-    if ($db->rowCount() > 0) {
-        echo "<div class='alert alert-danger'>The selected room is already booked for this time slot.</div>";
-    } else {
-        // Insert new booking
-        $insertBookingQuery = "INSERT INTO room_bookings (start_time, end_time, class_id, cl_type) VALUES (?, ?, ?, ?)";
-        $insertStmt = $pdo->prepare($insertBookingQuery);
-        $insertStmt->execute([$startDateTime, $endDateTime, $userEmail, $classType]);
-
-        echo "<div class='alert alert-success'>Booking successful!</div>";
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -53,83 +16,125 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Booking System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <script>
-        function disableUnavailableDays() {
-            const dateInput = document.getElementById('date');
-            const selectedDate = new Date(dateInput.value);
-            const day = selectedDate.getDay();
-            if (day === 5 || day === 6) {
-                dateInput.setCustomValidity('Bookings are not allowed on Fridays and Saturdays.');
-            } else {
-                dateInput.setCustomValidity('');
-            }
-        }
-        document.addEventListener('DOMContentLoaded', function () {
-            const timeSlotSelect = document.getElementById('time_slot');
-            const timeIntervals = [
-                '10:00 - 11:00',
-                '11:00 - 12:00',
-                '12:00 - 13:00',
-                '13:00 - 14:00',
-                '14:00 - 15:00',
-                '15:00 - 16:00',
-                '16:00 - 17:00',
-                '17:00 - 18:00'
-            ];
-
-            // Populate time slots in the dropdown
-            timeIntervals.forEach((interval, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = interval;
-                timeSlotSelect.appendChild(option);
-            });
-        });
-    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
 <body>
     <?php include("header.php"); ?>
 
     <div class="container mt-5">
-        <h2 class="text-center mb-4">Book a Room</h2>
-        <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="form-container mt-4">
+        <h1 class="text-center">Room Booking System</h1>
+
+        <form id="bookingForm" class="mt-4">
             <div class="mb-3">
                 <label for="date" class="form-label">Select Date:</label>
-                <input type="date" id="date" name="date" class="form-control" required onchange="disableUnavailableDays()">
+                <input type="date" id="date" name="date" class="form-control" required>
             </div>
+
             <div class="mb-3">
-                <label for="time_slot" class="form-label">Select Time Slot:</label>
-                <select id="time_slot" name="time_slot" class="form-control" required></select>
+    <label for="classType" class="form-label">Select Room Type:</label>
+    <select id="classType" name="classType" class="form-select" required>
+        <option value="">-- Select the type of class --</option>
+        <?php
+        // Fetch room types
+        $result = $pdo->query("SELECT * FROM class_type");
+        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+            echo "<option value='{$row['class_type_id']}'>{$row['type_name']}</option>";
+        }
+        ?>
+    </select>
+</div>
+
+        </form>
+
+        <div id="availableclasses" class="mt-4"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Booking Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Successfully booked the time slot!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="cl_type" class="form-label">Select Class Type:</label>
-                <select id="cl_type" name="cl_type" class="form-control" required>
-                    <?php
-                    $classTypes = $pdo->query("SELECT DISTINCT type FROM class_type")->fetchAll(PDO::FETCH_ASSOC);
-                    foreach ($classTypes as $type) {
-                        echo "<option value='{$type['type']}'>{$type['type']}</option>";
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Disable Fridays and Saturdays, and past dates
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const minDate = today.toISOString().split("T")[0]; // Current date in YYYY-MM-DD format
+
+            // Disable Fridays and Saturdays (5 and 6 are Friday and Saturday)
+            let disabledDays = [5, 6]; // Friday and Saturday
+            let disabledDates = [];
+
+            // Disable Fridays and Saturdays and past dates
+            $("#date").attr("min", minDate); // Disable past dates
+            $("#date").on("input", function () {
+                const selectedDate = new Date($(this).val());
+                const selectedDay = selectedDate.getDay();
+
+                // If selected day is Friday or Saturday, alert and reset to current date
+                if (disabledDays.includes(selectedDay)) {
+                    alert("You cannot select Fridays or Saturdays.");
+                    $(this).val(minDate);
+                }
+            });
+
+            // Fetch classes when room type and date are selected
+            $('#classType, #date').on('change', function () {
+                const date = $('#date').val();
+                const classType = $('#classType').val();
+
+                if (date && classType) {
+                    $.ajax({
+                        url: 'get_classes.php',
+                        type: 'GET',
+                        data: { date: date, classType: classType },
+                        success: function (data) {
+                            $('#availableclasses').html(data);
+                        }
+                    });
+                }
+            });
+
+            // Book a time slot
+            $(document).on('click', '.time-slot', function () {
+                const timeSlotId = $(this).data('time-slot-id');
+                const classId = $(this).data('class-id');
+                const date = $('#date').val();
+
+                $.ajax({
+                    url: 'book_slot.php',
+                    type: 'POST',
+                    data: { timeSlotId: timeSlotId, classId: classId, date: date },
+                    success: function (response) {
+                        if (response === 'success') {
+                            // Show success modal
+                            $('#successModal').modal('show');
+
+                            // Refresh the available classes and time slots
+                            $('#classType').trigger('change');
+                        } else {
+                            alert('Error booking the time slot. Please try again.');
+                        }
                     }
-                    ?>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Book Now</button>
-        </form>
-    </div>
-
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">Cancel a Booking</h2>
-        <form method="POST" action="cancel_booking.php" class="form-container mt-4">
-            <div class="mb-3">
-                <label for="booking_id" class="form-label">Booking ID:</label>
-                <input type="text" id="booking_id" name="booking_id" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-danger w-100">Cancel Booking</button>
-        </form>
-    </div>
-
+                });
+            });
+        });
+    </script>
     <?php include("footer.php"); ?>
 </body>
 </html>
