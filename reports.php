@@ -1,3 +1,22 @@
+<?php
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['user'])) 
+{
+    header("Location: login.php"); // Redirect to login page if not logged in
+    exit();
+}
+
+// Fetch user information from session
+$userEmail = $_SESSION['user'];
+
+// Assuming the full name is stored in the session or you have it fetched from the database
+// If it's not in the session, you might need to fetch it from the database based on the email
+// For simplicity, let's assume the user's full name is stored in session as well
+$userFullName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : 'Unknown User';
+?> 
+
 <!DOCTYPE html>
 <html lang="en">
 

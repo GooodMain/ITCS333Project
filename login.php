@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'];
 
     // Check the credentials (email and password)
-    $stmt = $pdo->prepare("SELECT email, fullName, password FROM user WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT email, fullName, password, user_type FROM user WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
@@ -16,15 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Store user information in the session
         $_SESSION['user'] = $user['email']; // Store email in session
         $_SESSION['fullName'] = $user['fullName']; // Store full name in session
-        
-        header("Location: index.php"); // Redirect to home page
+        $_SESSION['user_type'] = $user['user_type']; // Store user type in session
+
+        // Redirect based on user type
+        if ($_SESSION['user_type'] === 'admin') {
+            header("Location: dashboard.php"); // Redirect to admin dashboard
+        } else {
+            header("Location: index.php"); // Redirect to the user dashboard or home page
+        }
         exit();
     } else {
-        echo "Invalid email or password!";
+        $error = "Invalid email or password.";
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
