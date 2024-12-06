@@ -1,32 +1,15 @@
 <?php
-
 session_start();
 
 // Check if the user is logged in
-if (!isset($_SESSION['user'])) 
-{
+if (!isset($_SESSION['user'])) {
     header("Location: login.php"); // Redirect to login page if not logged in
     exit();
 }
 
 // Fetch user information from session
 $userEmail = $_SESSION['user'];
-
-// Assuming the full name is stored in the session or you have it fetched from the database
-// If it's not in the session, you might need to fetch it from the database based on the email
-// For simplicity, let's assume the user's full name is stored in session as well
 $userFullName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : 'Unknown User';
-
-
-
-
-
-
-
-
-
-
-
 
 // Include database connection
 require_once 'connection.php';
@@ -71,13 +54,11 @@ function getPastBookings($pdo, $user_id) {
     return $data1->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Assume user is logged in and we have their user_id
-$user_id = 1; // Replace with actual user authentication
+// Use the actual user ID from the session instead of a hardcoded value.
+$user_id = $_SESSION['user_id'] ?? 1;
 
-// Get room usage statistics
+// Get room usage statistics and user's bookings
 $roomStats = getRoomUsageStats($pdo);
-
-// Get user's upcoming and past bookings
 $upcomingBookings = getUpcomingBookings($pdo, $user_id);
 $pastBookings = getPastBookings($pdo, $user_id);
 ?>
@@ -88,93 +69,90 @@ $pastBookings = getPastBookings($pdo, $user_id);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking System Analytics</title>
-    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <?php include("header.php"); ?>
 
-    <div>
-        
-        <p>Hello, <strong><?= htmlspecialchars($userFullName) ?></strong><br>  thiss you report </p>
+<div class="container mt-4">
+    <h1 class="mb-4">Booking System Analytics</h1>
+    <p>Hello, <strong><?= htmlspecialchars($userFullName) ?></strong><br>This is your report</p>
 
+    <section class="mb-4">
+        <h2 class="mb-3">Room Usage Statistics</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Room</th>
+                    <th>Booking Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($roomStats as $room): ?>
+                <tr>
+                    <td><?= htmlspecialchars($room['class_num']) ?></td>
+                    <td><?= htmlspecialchars($room['booking_count']) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </section>
 
-
-
-
-    <main class="container">
-        <h1>Booking System Analytics</h1>
-
-        <section>
-            <h2>Room Usage Statistics</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Room</th>
-                        <th>Booking Count</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($roomStats as $room): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($room['class_num']) ?></td>
-                        <td><?= $room['booking_count'] ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </section>
-
-        <section>
-            <h2>Your Upcoming Bookings</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Room</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                    </tr>
-                </thead>
-                <tbody>
+    <section class="mb-4">
+        <h2 class="mb-3">Your Upcoming Bookings</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Room</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($upcomingBookings)): ?>
+                    <tr><td colspan="3">You have no upcoming bookings.</td></tr>
+                <?php else: ?>
                     <?php foreach ($upcomingBookings as $booking): ?>
                     <tr>
                         <td><?= htmlspecialchars($booking['class_num']) ?></td>
-                        <td><?= $booking['booking_date'] ?></td>
-                        <td><?= $booking['start_time'] . ' - ' . $booking['end_time'] ?></td>
+                        <td><?= htmlspecialchars($booking['booking_date']) ?></td>
+                        <td><?= htmlspecialchars($booking['start_time'] . ' - ' . $booking['end_time']) ?></td>
                     </tr>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
-        </section>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </section>
 
-        <section>
-            <h2>Your Past Bookings</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Room</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                    </tr>
-                </thead>
-                <tbody>
+    <section class="mb-4">
+        <h2 class="mb-3">Your Past Bookings</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Room</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($pastBookings)): ?>
+                    <tr><td colspan="3">You have no past bookings.</td></tr>
+                <?php else: ?>
                     <?php foreach ($pastBookings as $booking): ?>
                     <tr>
                         <td><?= htmlspecialchars($booking['class_num']) ?></td>
-                        <td><?= $booking['booking_date'] ?></td>
-                        <td><?= $booking['start_time'] . ' - ' . $booking['end_time'] ?></td>
+                        <td><?= htmlspecialchars($booking['booking_date']) ?></td>
+                        <td><?= htmlspecialchars($booking['start_time'] . ' - ' . $booking['end_time']) ?></td>
                     </tr>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
-        </section>
-    </main>
-    <?php include("footer.php"); ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </section>
+
+</div>
+
+<?php include("footer.php"); ?>
 </body>
 </html>
-
-
-
-
-
-
