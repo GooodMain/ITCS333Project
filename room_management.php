@@ -59,7 +59,7 @@ if (isset($_GET['edit_room_id'])) {
 <?php include("header.php"); ?>
 
 <div class="container mt-4">
-    <h2>Room Management</h2>
+    <h2>Room Type Management</h2>
 
     <!-- Add/Edit Room Form -->
     <form method="POST" class="mb-4">
