@@ -25,14 +25,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $capacity = $_POST['capacity'];
         $equipments = $_POST['equipments'];
 
-        $stmt = $pdo->prepare("UPDATE class_type SET type_name = ?, capacity = ?, equipments = ? WHERE type_id = ?");
+        $stmt = $pdo->prepare("UPDATE class_type SET type_name = ?, capacity = ?, equipments = ? WHERE class_type_id = ?");
         $stmt->execute([$typeName, $capacity, $equipments, $roomId]);
     } elseif ($action === 'delete') {
-        $stmt = $pdo->prepare("DELETE FROM class_type WHERE type_id = ?");
+        $stmt = $pdo->prepare("DELETE FROM class_type WHERE class_type_id = ?");
         $stmt->execute([$roomId]);
     }
     header("Location: room_management.php"); // Refresh the page after action
     exit();
+}
+
+// Fetch the room data for editing
+$roomToEdit = null;
+if (isset($_GET['edit_room_id'])) {
+    $roomId = $_GET['edit_room_id'];
+    $stmt = $pdo->prepare("SELECT * FROM class_type WHERE class_type_id = ?");
+    $stmt->execute([$roomId]);
+    $roomToEdit = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
 
@@ -43,6 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Management</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<!-- Style sheet Link-->
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -50,21 +61,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container mt-4">
     <h2>Room Management</h2>
 
-    <!-- Add Room Form -->
+    <!-- Add/Edit Room Form -->
     <form method="POST" class="mb-4">
-        <input type="hidden" name="action" value="add">
+        <input type="hidden" name="action" value="<?= $roomToEdit ? 'edit' : 'add' ?>">
+        <?php if ($roomToEdit): ?>
+            <input type="hidden" name="room_id" value="<?= $roomToEdit['class_type_id'] ?>">
+        <?php endif; ?>
+
         <div class="row">
             <div class="col-md-3">
-                <input type="text" name="type_name" class="form-control" placeholder="Room Type" required>
+                <input type="text" name="type_name" class="form-control" placeholder="Room Type" value="<?= $roomToEdit['type_name'] ?? '' ?>" required>
             </div>
             <div class="col-md-3">
-                <input type="number" name="capacity" class="form-control" placeholder="Capacity" required>
+                <input type="number" name="capacity" class="form-control" placeholder="Capacity" value="<?= $roomToEdit['capacity'] ?? '' ?>" required>
             </div>
             <div class="col-md-3">
-                <input type="text" name="equipments" class="form-control" placeholder="Equipments" required>
+                <input type="text" name="equipments" class="form-control" placeholder="Equipments" value="<?= $roomToEdit['equipments'] ?? '' ?>" required>
             </div>
             <div class="col-md-3">
-                <button type="submit" class="btn btn-success">Add Room</button>
+                <button type="submit" class="btn brand z-depth-0"><?= $roomToEdit ? 'Update Room' : 'Add Room' ?></button>
             </div>
         </div>
     </form>
@@ -83,23 +98,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php
     $rooms = $pdo->query("SELECT * FROM class_type")->fetchAll(PDO::FETCH_ASSOC);
     foreach ($rooms as $room) {
+        $class_type_id = $room['class_type_id']; // Assuming 'class_type_id' is available
+
         echo "<tr>
                 <td>{$room['type_name']}</td>
                 <td>{$room['capacity']}</td>
                 <td>{$room['equipments']}</td>
                 <td>
                     <!-- Edit Button -->
-                    <form method='POST' style='display:inline;'>
-                        <input type='hidden' name='action' value='edit'>
-                        <input type='hidden' name='room_id' value='{$room['type_id']}'>
-                        <button type='submit' class='btn btn-primary btn-sm' data-toggle='tooltip' title='Edit Room'>Edit</button>
-                    </form>
+                    <a href='room_management.php?edit_room_id={$class_type_id}' class='btn brand z-depth-0'>Edit</a>
                     
                     <!-- Delete Button with Confirmation -->
                     <form method='POST' style='display:inline;'>
                         <input type='hidden' name='action' value='delete'>
-                        <input type='hidden' name='room_id' value='{$room['type_id']}'>
-                        <button type='submit' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this room?\")'>Delete</button>
+                        <input type='hidden' name='room_id' value='{$class_type_id}'>
+                        <button type='submit' class='btn brand z-depth-0' onclick='return confirm(\"Are you sure you want to delete this room?\")'>Delete</button>
                     </form>
                 </td>
             </tr>";
@@ -107,9 +120,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ?>
 </tbody>
 
-    </table>
 </div>
 
 <?php include("footer.php"); ?>
+
 </body>
 </html>

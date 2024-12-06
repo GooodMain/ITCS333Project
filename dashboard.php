@@ -20,6 +20,8 @@ $totalUsers = $pdo->query("SELECT COUNT(*) FROM user")->fetchColumn();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<!-- Style sheet Link-->
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <?php include("header.php"); ?>
