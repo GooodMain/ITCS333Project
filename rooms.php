@@ -43,7 +43,7 @@ try {
                             <h6><?php echo htmlspecialchars($room['type_name']); ?></h6>
                             <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap;"><img
                                     src="image/<?php echo htmlspecialchars($room['image']); ?>"
-                                    style="max-width: 100%; height: auto; margin: auto;" /></div>
+                                    style="width: 80%; height: 80%;" /></div>
                         </div>
 
                         <div class="card-action right-align">
@@ -57,9 +57,9 @@ try {
                                     <div class="modal-header">
                                         <div id="txt" style="float:left;"><img
                                                 src="image/<?php echo htmlspecialchars($room['image']); ?>"
-                                                style="width:300px; height:200px;" /></div>
+                                                style="width:450px; height:auto;" /></div>
                                         <h4 class="modal-title"><?php echo htmlspecialchars($room['type_name']); ?></h4>
-                                        <br> <br> <br> <br> <br>
+                                        <br> <br> <br> <br>
                                         <p>Details about this room:</p>
                                         <br>
                                         <p>Capacity: <?php echo htmlspecialchars($room['capacity']); ?></p>

@@ -36,12 +36,13 @@ $userFullName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : 'Unknown 
 <body>
 <?php include("header.php"); ?>
 
-    <div>
-        <h2>Welcome to the IT College</h2>
-        <p>Hello, <strong><?= htmlspecialchars($userFullName) ?></strong><br>You are successfully logged in!</p>
-        <h3>ABOUT US</h3>
-        <p>This is the IT college  room booking system </p>
-         <p> you can explore our rooms in the ROOMS page </p>
+    <div class="center black-text">
+        <h3>Welcome to the IT College</h3>
+        <h4>of University of Bahrain</h4>
+        <br><br>
+        <p>Hello, <strong><?= htmlspecialchars($userFullName) ?></strong></p>
+        <br>
+         <p> You can explore, check avaliable room at any date and time-slot and book any room at the IT college. </p>
         
     </div>
 
