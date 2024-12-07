@@ -59,9 +59,14 @@ try {
                                                 src="image/<?php echo htmlspecialchars($room['image']); ?>"
                                                 style="width:300px; height:200px;" /></div>
                                         <h4 class="modal-title"><?php echo htmlspecialchars($room['type_name']); ?></h4>
-                                        <p>Details about the room:</p>
+                                        <br> <br> <br> <br> <br>
+                                        <p>Details about this room:</p>
+                                        <br>
                                         <p>Capacity: <?php echo htmlspecialchars($room['capacity']); ?></p>
+                                        <br>
                                         <p>Equipments: <?php echo htmlspecialchars($room['equipments']); ?></p>
+                                        <br> <br>
+                                        <p>There are <?php echo htmlspecialchars($room['class_count']); ?> of this type in the IT college</p>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

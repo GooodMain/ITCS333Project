@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 05, 2024 at 07:31 PM
+-- Generation Time: Dec 07, 2024 at 08:56 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -67,6 +67,43 @@ INSERT INTO `classes` (`class_id`, `class_num`, `class_type_id`) VALUES
 (25, 'Open Lab 2', 4),
 (26, 'Benefit La', 1);
 
+--
+-- Triggers `classes`
+--
+DELIMITER $$
+CREATE TRIGGER `after_class_delete` AFTER DELETE ON `classes` FOR EACH ROW BEGIN
+    UPDATE class_type
+    SET class_count = class_count - 1
+    WHERE class_type_id = OLD.class_type_id;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_class_insert` AFTER INSERT ON `classes` FOR EACH ROW BEGIN
+    UPDATE class_type
+    SET class_count = class_count + 1
+    WHERE class_type_id = NEW.class_type_id;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_class_update` AFTER UPDATE ON `classes` FOR EACH ROW BEGIN
+    -- Check if the class type has been updated
+    IF OLD.class_type_id != NEW.class_type_id THEN
+        -- Decrement the count for the old type
+        UPDATE class_type
+        SET class_count = class_count - 1
+        WHERE class_type_id = OLD.class_type_id;
+
+        -- Increment the count for the new type
+        UPDATE class_type
+        SET class_count = class_count + 1
+        WHERE class_type_id = NEW.class_type_id;
+    END IF;
+END
+$$
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
@@ -78,21 +115,19 @@ CREATE TABLE `class_type` (
   `type_name` varchar(20) NOT NULL,
   `capacity` varchar(255) NOT NULL,
   `equipments` varchar(255) NOT NULL,
-  `image` longblob DEFAULT NULL,
-  `image_name` varchar(255) DEFAULT ''
+  `image` varchar(255) DEFAULT NULL,
+  `class_count` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `class_type`
 --
 
-INSERT INTO `class_type` (`class_type_id`, `type_name`, `capacity`, `equipments`, `image`, `image_name`) VALUES
-(1, 'benefit lab', '30-40 students', '30-40 PC\'s and one projector ', NULL, '');
-INSERT INTO `class_type` (`class_type_id`, `type_name`, `capacity`, `equipments`, `image`, `image_name`) VALUES
-(2, 'class', '50-60 students', 'one PC, one projector and one white board.', NULL, '');
-INSERT INTO `class_type` (`class_type_id`, `type_name`, `capacity`, `equipments`, `image`, `image_name`) VALUES
-(3, 'lab', '30-40 students', '30-40 PC\'s, one projector and one white board.', NULL, ''),
-(4, 'open lab', '130-150 students', '60-70 PC\'s, one projector and two white boards, one microphone and speakers', NULL, '');
+INSERT INTO `class_type` (`class_type_id`, `type_name`, `capacity`, `equipments`, `image`, `class_count`) VALUES
+(1, 'Benefit Lab', '30-40 students', '30-40 PC\'s and one projector ', 'benefit.jpg', 1),
+(2, 'Class Room', '50-60 students', 'one PC, one projector and one white board.', 'class.jpg', 6),
+(3, 'Lab Room', '30-40 students', '30-40 PC\'s, one projector and one white board.', 'lab.jpg', 4),
+(4, 'Open Lab Area', '130-150 students', '60-70 PC\'s, one projector and two white boards, one microphone and speakers', 'open.jpg', 2);
 
 -- --------------------------------------------------------
 
@@ -134,20 +169,21 @@ CREATE TABLE `user` (
   `fullName` varchar(100) NOT NULL,
   `phoneNum` varchar(15) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `user_type` varchar(10) NOT NULL
+  `user_type` varchar(10) NOT NULL,
+  `profile_picture` varchar(255) DEFAULT 'Unknown.png'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`user_id`, `email`, `fullName`, `phoneNum`, `password`, `user_type`) VALUES
-(1, '202011514@stu.uob.edu.bh', 'Maryam Husain', '39565657', '$2y$10$99R48JdubD.51zBRuDri6uTMnjEqhcB9718/rIpq5Hy8hMwKd251O', ''),
-(2, '202011585@stu.uob.edu.bh', 'Mohammed Alhusaini', '+973 33414205', '$2y$10$u/rHU4xekWINDFKUitkwdueipn4Od.XZH4FKMHWhnPZ5cGBsLwpWq', ''),
-(3, '202100111@stu.uob.edu.bh', 'pass:123-Admin', '33333333', '123-Admin', 'admin'),
-(4, '202100863@stu.uob.edu.bh', 'ASMA', '32217880', '$2y$10$1eGP1se39abCMzixLxMevu8kRqWXXWymElNAHwnVmfFnS1Xr45Roy', ''),
-(5, 'salehmohmd@uob.edu.bh', 'Saleh Mohammed', '0097333695821', '$2y$10$z93bf6mdgNDN9lxGDXA9eORqqIR46OCPuT/TxZ6L6jrg0C37d0PT2', ''),
-(6, '202102021@stu.uob.edu.bh', 'haya', '33221155', '$2y$10$Y36125.7YRMGTcEehM4U/O8zQWi.9wqvwr3.U//9UeLkMsvwS/4ma', '');
+INSERT INTO `user` (`user_id`, `email`, `fullName`, `phoneNum`, `password`, `user_type`, `profile_picture`) VALUES
+(1, '202011514@stu.uob.edu.bh', 'Maryam Husain', '39565657', '$2y$10$99R48JdubD.51zBRuDri6uTMnjEqhcB9718/rIpq5Hy8hMwKd251O', '', 'Unknown.png'),
+(2, '202011585@stu.uob.edu.bh', 'Mohammed Alhusaini', '+973 33414205', '$2y$10$u/rHU4xekWINDFKUitkwdueipn4Od.XZH4FKMHWhnPZ5cGBsLwpWq', '', 'Unknown.png'),
+(3, '202100111@stu.uob.edu.bh', 'pass:123-Admin', '33333333', '123-Admin', 'admin', 'Unknown.png'),
+(4, '202100863@stu.uob.edu.bh', 'ASMA', '32217880', '$2y$10$1eGP1se39abCMzixLxMevu8kRqWXXWymElNAHwnVmfFnS1Xr45Roy', '', 'Unknown.png'),
+(5, 'salehmohmd@uob.edu.bh', 'Saleh Mohammed', '0097333695821', '$2y$10$z93bf6mdgNDN9lxGDXA9eORqqIR46OCPuT/TxZ6L6jrg0C37d0PT2', '', 'Unknown.png'),
+(6, '202102021@stu.uob.edu.bh', 'haya', '33221155', '$2y$10$Y36125.7YRMGTcEehM4U/O8zQWi.9wqvwr3.U//9UeLkMsvwS/4ma', '', 'Unknown.png');
 
 --
 -- Indexes for dumped tables
@@ -202,7 +238,7 @@ ALTER TABLE `bookings`
 -- AUTO_INCREMENT for table `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `class_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `class_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `class_type`
