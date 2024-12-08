@@ -6,7 +6,7 @@ session_start();
 include 'connection.php';
  
 // Check if the user is logged in via session
-if (!isset($_SESSION['user'])) {
+if (!isset($_SESSION['user_id'])) {
     header("Location: home.php");
     exit("User not logged in. Please log in to access your profile.");
 }
