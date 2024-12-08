@@ -1,16 +1,28 @@
 <?php
 session_start();
 
-// Check if the user is logged in
+// Ensure user is logged in
 if (!isset($_SESSION['user'])) {
     header("Location: login.php"); // Redirect to login page if not logged in
     exit();
 }
-require 'connection.php';
 
-// Set user ID manually for testing purposes
-$user_id = 1; // Replace with the desired user ID
-$userFullName = 'Test User'; // Replace with the desired user full name
+// Ensure that 'user_id' is set in session
+if (!isset($_SESSION['user_id'])) {
+    // If 'user_id' is not set, handle the error (redirect or set a default value)
+    $_SESSION['user_id'] = 1; // Manually set a user_id for testing (replace this with real logic)
+    // You could also redirect them to the login page, or handle it however you prefer:
+    // header("Location: login.php");
+    // exit();
+}
+
+// Fetch user information from session
+$userEmail = $_SESSION['user'];
+$userFullName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : 'Unknown User';
+$user_id = $_SESSION['user_id']; // Set $user_id from session
+
+// Include database connection
+require_once 'connection.php';
 
 // Functions to fetch data
 function getRoomUsageStats($pdo) {
@@ -64,7 +76,6 @@ $pastBookings = getPastBookings($pdo, $user_id);
 <body>
 <?php include("header.php"); ?>
     <div class="container mt-4">
-        <h1>Reporting & Analytics</h1>
         <p>Welcome, <strong><?= htmlspecialchars($userFullName) ?></strong></p>
 
         <!-- Room Usage Statistics -->
