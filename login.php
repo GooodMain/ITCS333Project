@@ -9,12 +9,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
     $password = $_POST['password'];
 
     // Check the credentials (email and password)
-    $stmt = $pdo->prepare("SELECT email, fullName, password, user_type FROM user WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT user_id, email, fullName, password, user_type FROM user WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
         // Store user information in the session
+        $_SESSION['user_id'] = $user['user_id'];
         $_SESSION['user'] = $user['email']; // Store email in session
         $_SESSION['fullName'] = $user['fullName']; // Store full name in session
         $_SESSION['user_type'] = $user['user_type']; // Store user type in session
