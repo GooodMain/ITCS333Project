@@ -76,7 +76,6 @@ $pastBookings = getPastBookings($pdo, $user_id);
 <body>
 <?php include("header.php"); ?>
     <div class="container mt-4">
-        <p>Welcome, <strong><?= htmlspecialchars($userFullName) ?></strong></p>
 
         <!-- Room Usage Statistics -->
         <section>

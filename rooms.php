@@ -33,9 +33,9 @@ try {
 <body>
     <?php include("header.php"); ?>
 
-    <h4 class="center grey-text">ROOMS</h4>
 
     <div class="container">
+        <h2 styles="position=center">Discover our Rooms</h2>
         <div class="row">
             <?php foreach ($class as $index => $room) { // Add an index for unique IDs ?>
                 <div class="col s6 md3">
