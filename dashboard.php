@@ -3,7 +3,7 @@ session_start();
 include 'connection.php';
 //only admins can access
 if ($_SESSION['user_type'] !== 'admin') {
-    header("Location: login.php");
+    header("Location: home.php");
     exit();
 }
 
