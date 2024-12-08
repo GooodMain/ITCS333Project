@@ -66,6 +66,7 @@
             <?php if ($_SESSION['user_type'] === 'admin'): ?>
                 <li><a class="btn brand z-depth-0" href="dashboard.php">Dashboard</a></li>
                 <li><a class="btn brand z-depth-0" href="room_management.php">Room Management</a></li>
+                <li><a class="btn brand z-depth-0" href="user_management.php">User Management</a></li>
             <?php endif; ?>
         </ul>
 
@@ -80,6 +81,7 @@
             <?php if ($_SESSION['user_type'] === 'admin'): ?>
                 <li><a class="btn brand z-depth-0" href="dashboard.php">Dashboard</a></li>
                 <li><a class="btn brand z-depth-0" href="room_management.php">Room Management</a></li>
+                <li><a class="btn brand z-depth-0" href="user_management.php">User Management</a></li>
             <?php endif; ?>
 
             <li><a href="logout.php" class="btn brand z-depth-0">Logout</a></li>

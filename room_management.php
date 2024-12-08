@@ -89,19 +89,7 @@ if (isset($_GET['edit_class_id'])) {
     <title>Room Management</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
-    <style>
-        .btn-danger {
-            background-color: #be123c !important;
-        }
-
-        .btn-secondary {
-            background-color: #f97316 !important;
-        }
-
-        .btn-primary {
-            background-color: green !important;
-        }
-    </style>
+   
 </head>
 
 <body>
@@ -132,7 +120,7 @@ if (isset($_GET['edit_class_id'])) {
                 </div>
                 <div class="col-md-3">
                     <button type="submit"
-                        class="btn btn-primary"><?= $roomToEdit ? 'Update Room' : 'Add Room' ?></button>
+                        class="btn btn-success"><?= $roomToEdit ? 'Update Room' : 'Add Room' ?></button>
                 </div>
             </div>
         </form>
@@ -158,7 +146,7 @@ if (isset($_GET['edit_class_id'])) {
                             <td>{$room['capacity']}</td>
                             <td>{$room['equipments']}</td>
                             <td>
-                                <a href='room_management.php?edit_room_id={$room['class_type_id']}#room_management' class='btn btn-secondary'>Edit</a>
+                                <a href='room_management.php?edit_room_id={$room['class_type_id']}#room_management' class='btn btn-warning'>Edit</a>
                                 <form method='POST' style='display:inline;'>
                                     <input type='hidden' name='entity' value='class_type'>
                                     <input type='hidden' name='action' value='delete'>
@@ -200,7 +188,7 @@ if (isset($_GET['edit_class_id'])) {
                 </div>
                 <div class="col-md-3">
                     <button type="submit"
-                        class="btn btn-primary"><?= $classToEdit ? 'Update Class' : 'Add Class' ?></button>
+                        class="btn btn-success"><?= $classToEdit ? 'Update Class' : 'Add Class' ?></button>
                 </div>
             </div>
         </form>
@@ -227,7 +215,7 @@ if (isset($_GET['edit_class_id'])) {
                             <td>{$class['class_num']}</td>
                             <td>{$roomType['type_name']}</td>
                             <td>
-                                <a href='room_management.php?edit_class_id={$class['class_id']}#class_management' class='btn btn-secondary'>Edit</a>
+                                <a href='room_management.php?edit_class_id={$class['class_id']}#class_management' class='btn btn-warning'>Edit</a>
                                 <form method='POST' style='display:inline;'>
                                     <input type='hidden' name='entity' value='classes'>
                                     <input type='hidden' name='action' value='delete'>
