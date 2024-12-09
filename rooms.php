@@ -62,9 +62,13 @@ try {
                 <img src="image/<?php echo htmlspecialchars($room['image']); ?>" style="width:450px; height:auto;" />
             </div>
             <h4 class="modal-title"><?php echo htmlspecialchars($room['type_name']); ?></h4>
+            <br><br><br><br><br>
             <p>Details about this room:</p>
+            <br><br>
             <p><strong>Capacity:</strong> <?php echo htmlspecialchars($room['capacity']); ?></p>
+            <br>
             <p><strong>Equipments:</strong> <?php echo htmlspecialchars($room['equipments']); ?></p>
+            <br>
             <p>There are <?php echo htmlspecialchars($room['class_count']); ?> of this type in the IT college</p>
         </div>
         <div class="modal-footer">
