@@ -19,7 +19,8 @@ require_once 'connection.php';
 function getRoomUsageStats($pdo) {
     $query = "SELECT c.class_num, 
                      COUNT(CASE WHEN b.booking_status = 'confirmed' THEN 1 END) AS confirmed_bookings,
-                     COUNT(CASE WHEN b.booking_status = 'cancelled' THEN 1 END) AS cancelled_bookings
+                     COUNT(CASE WHEN b.booking_status = 'cancelled' THEN 1 END) AS cancelled_bookings,
+                     COUNT(CASE WHEN b.booking_status = 'expired' THEN 1 END) AS expired_bookings
               FROM classes c
               LEFT JOIN bookings b ON c.class_id = b.class_id
               GROUP BY c.class_id
@@ -43,6 +44,7 @@ function getAllBookingsByStatus($pdo, $user_id, $status) {
 $roomUsageStats = getRoomUsageStats($pdo);
 $confirmedBookings = getAllBookingsByStatus($pdo, $user_id, 'confirmed');
 $cancelledBookings = getAllBookingsByStatus($pdo, $user_id, 'cancelled');
+$expiredBookings = getAllBookingsByStatus($pdo, $user_id, 'expired');
 ?>
 
 <!DOCTYPE html>
@@ -67,6 +69,7 @@ $cancelledBookings = getAllBookingsByStatus($pdo, $user_id, 'cancelled');
                         <th>Room</th>
                         <th>Confirmed Bookings</th>
                         <th>Cancelled Bookings</th>
+                        <th>Past Bookings</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -75,6 +78,7 @@ $cancelledBookings = getAllBookingsByStatus($pdo, $user_id, 'cancelled');
                             <td><?= htmlspecialchars($room['class_num']) ?></td>
                             <td><?= htmlspecialchars($room['confirmed_bookings']) ?></td>
                             <td><?= htmlspecialchars($room['cancelled_bookings']) ?></td>
+                            <td><?= htmlspecialchars($room['expired_bookings']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -135,6 +139,33 @@ $cancelledBookings = getAllBookingsByStatus($pdo, $user_id, 'cancelled');
                 </tbody>
             </table>
         </section>
+
+        <!-- Past Bookings -->
+        <section class="mt-5">
+            <h2>Your Past Bookings</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($expiredBookings)): ?>
+                        <tr><td colspan="3">No past bookings.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($expiredBookings as $booking): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($booking['class_num']) ?></td>
+                                <td><?= htmlspecialchars($booking['booking_date']) ?></td>
+                                <td><?= htmlspecialchars($booking['start_time'] . ' - ' . $booking['end_time']) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </section>
     </div>
 
     <script>
@@ -158,6 +189,13 @@ $cancelledBookings = getAllBookingsByStatus($pdo, $user_id, 'cancelled');
                         data: roomUsageData.map(item => item.cancelled_bookings),
                         backgroundColor: 'rgba(255, 99, 132, 0.6)',
                         borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Past Bookings',
+                        data: roomUsageData.map(item => item.expired_bookings),
+                        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
                         borderWidth: 1
                     }
                 ]
