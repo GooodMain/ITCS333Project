@@ -1,51 +1,42 @@
 <?php
 require 'connection.php';
 
-$timeSlotId = $_POST['timeSlotId'] ?? null;
-$classId = $_POST['classId'] ?? null;
-$date = $_POST['date'] ?? null;
+$class_type_id = $_GET['class_type_id'];
+$booking_date = $_GET['booking_date'];
 
-if (!$timeSlotId || !$classId || !$date) {
-    echo "Invalid parameters.";
-    exit;
+// Get classes of the selected type
+$db = $pdo->prepare("SELECT * FROM classes WHERE class_type_id = ?");
+$db->execute([$class_type_id]);
+$classes = $db->fetchAll(PDO::FETCH_ASSOC);
+
+// Get all time slots
+$db = $pdo->prepare("SELECT * FROM time_slots");
+$db->execute();
+$timeSlots = $db->fetchAll(PDO::FETCH_ASSOC);
+
+// Get booked time slots
+$db = $pdo->prepare("SELECT class_id, time_slot_id FROM bookings WHERE booking_date = ?");
+$db->execute([$booking_date]);
+$bookedSlots = $db->fetchAll(PDO::FETCH_ASSOC);
+
+$bookedMap = [];
+foreach ($bookedSlots as $slot) {
+    $bookedMap[$slot['class_id']][$slot['time_slot_id']] = true;
 }
 
-$dayOfWeek = date('w', strtotime($date));
-if ($dayOfWeek == 5 || $dayOfWeek == 6 || $date < date('Y-m-d')) {
-    echo "Invalid date selection. Booking not allowed.";
-    exit;
-}
-
-
-// Get POST data
-$classId = $_POST['classId'];
-$timeSlotId = $_POST['timeSlotId'];
-$date = $_POST['date'];
-
-// Check if the required data is available
-if (empty($classId) || empty($timeSlotId) || empty($date)) {
-    echo json_encode(['status' => 'error', 'message' => 'Missing required parameters.']);
-    exit;
-}
-
-// Prepare the SQL query to insert the booking
-$query = "INSERT INTO bookings (class_id, time_slot_id, booking_date) VALUES (?, ?, ?)";
-$data = $pdo->prepare($query);
-
-// Check if the statement was prepared successfully
-if ($data === false) {
-    echo 'error: Failed to prepare statement';
-    exit;
-}
-
-// Bind parameters
-$data->bind_param("iis", $classId, $timeSlotId, $date);
-
-// Execute the query
-if ($data->execute()) {
-    echo 'success';
-} else {
-    // Capture and log the error from MySQL
-    echo 'error: ' . $data->error;  // Show error message from MySQL
-}
-?>
+foreach ($classes as $class): ?>
+    <h5><?= htmlspecialchars($class['class_num']) ?></h5>
+    <div class="d-flex flex-wrap mb-3">
+        <?php foreach ($timeSlots as $slot): ?>
+            <?php $isBooked = isset($bookedMap[$class['class_id']][$slot['time_slot_id']]); ?>
+            <form method="POST" class="me-2">
+                <input type="hidden" name="class_id" value="<?= $class['class_id'] ?>">
+                <input type="hidden" name="time_slot_id" value="<?= $slot['time_slot_id'] ?>">
+                <input type="hidden" name="booking_date" value="<?= htmlspecialchars($booking_date) ?>">
+                <button type="submit" class="btn <?= $isBooked ? 'btn-secondary' : 'btn-primary' ?>" <?= $isBooked ? 'disabled' : '' ?>>
+                    <?= htmlspecialchars($slot['start_time'] . ' - ' . $slot['end_time']) ?>
+                </button>
+            </form>
+        <?php endforeach; ?>
+    </div>
+<?php endforeach; ?>
