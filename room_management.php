@@ -3,8 +3,7 @@ session_start();
 include 'connection.php';
 
 // Ensure only admins can access
-if ($_SESSION['user_type'] !== 'admin') 
-{
+if ($_SESSION['user_type'] !== 'admin') {
     header("Location: home.php");
     exit();
 }
@@ -19,15 +18,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['entity']) && $_POST['
         $capacity = $_POST['capacity'];
         $equipments = $_POST['equipments'];
 
-        $stmt = $pdo->prepare("INSERT INTO class_type (type_name, capacity, equipments) VALUES (?, ?, ?)");
-        $stmt->execute([$typeName, $capacity, $equipments]);
+        
+        // Handle image upload
+        $imagePath = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+    // Define constants
+    $target_dir = "image/"; // Directory where images will be stored
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif']; // Allowed image types
+    $max_size = 5 * 1024 * 1024; // 5 MB
+
+    // Validate file type
+    $file_type = $_FILES['image']['type'];
+    if (!in_array($file_type, $allowed_types)) {
+        exit("Error: Only JPG, PNG, and GIF files are allowed.");
+    }
+
+    // Check file size
+    if ($_FILES['image']['size'] > $max_size) {
+        exit("Error: File size cannot exceed 5 MB.");
+    }
+
+    // Ensure the 'image' directory exists
+    if (!is_dir($target_dir)) {
+        mkdir($target_dir, 0755, true);
+    }
+
+    // Generate a unique file name to avoid overwriting
+    $fileName = uniqid() . '_' . basename($_FILES['image']['name']);
+    $imagePath = $target_dir . $fileName;
+
+    // Move uploaded file to the designated folder
+    if (!move_uploaded_file($_FILES['image']['tmp_name'], $imagePath)) {
+        die('Failed to upload image.');
+    }
+}
+
+        
+
+        // Insert into database
+        $stmt = $pdo->prepare("INSERT INTO class_type (type_name, capacity, equipments, image) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$typeName, $capacity, $equipments, $imagePath]);
     } elseif ($action === 'edit') {
         $typeName = $_POST['type_name'];
         $capacity = $_POST['capacity'];
         $equipments = $_POST['equipments'];
 
-        $stmt = $pdo->prepare("UPDATE class_type SET type_name = ?, capacity = ?, equipments = ? WHERE class_type_id = ?");
-        $stmt->execute([$typeName, $capacity, $equipments, $roomId]);
+        // Handle image upload for edits
+        // Handle image upload for edits
+        $imagePath = $roomToEdit['image']; // Keep existing image path if no new file is uploaded
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            // Ensure the 'image' directory exists
+            $uploadDir = 'image/'; // Change the directory to 'image'
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+        
+            // Generate a unique file name to avoid overwriting
+            $fileName = uniqid() . '_' . basename($_FILES['image']['name']);
+            $imagePath = $uploadDir . $fileName;
+        
+            if (!move_uploaded_file($_FILES['image']['tmp_name'], $imagePath)) {
+                die('Failed to upload image.');
+            }
+        }
+        
+        
+
+        // Update database
+        $stmt = $pdo->prepare("UPDATE class_type SET type_name = ?, capacity = ?, equipments = ?, image = ? WHERE class_type_id = ?");
+        $stmt->execute([$typeName, $capacity, $equipments, $imagePath, $roomId]);
     } elseif ($action === 'delete') {
         $stmt = $pdo->prepare("DELETE FROM class_type WHERE class_type_id = ?");
         $stmt->execute([$roomId]);
@@ -80,6 +139,7 @@ if (isset($_GET['edit_class_id'])) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -87,9 +147,20 @@ if (isset($_GET['edit_class_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css">
-   
+    <style> 
+        a {
+            font-size: 15px !important; 
+        }
+
+        h4 {
+            font-size: 37.5px !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -115,9 +186,13 @@ if (isset($_GET['edit_class_id'])) {
                         value="<?= $roomToEdit['capacity'] ?? '' ?>" required>
                 </div>
                 <div class="col-md-3">
-                    <input type="text" name="equipments" class="form-control" placeholder="Equipments"
-                        value="<?= $roomToEdit['equipments'] ?? '' ?>" required>
+                    <input type="text" name="equipments" class="form-control" placeholder="Equipments" 
+                    value="<?= $roomToEdit['equipments'] ?? '' ?>" required>
                 </div>
+                <div class="col-md-3">
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                </div>
+
                 <div class="col-md-3">
                     <button type="submit"
                         class="btn btn-success"><?= $roomToEdit ? 'Update Room' : 'Add Room' ?></button>
@@ -126,39 +201,57 @@ if (isset($_GET['edit_class_id'])) {
         </form>
 
         <table class="table">
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Capacity</th>
-                    <th>Equipments</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $rooms = $pdo->query("SELECT * FROM class_type")->fetchAll(PDO::FETCH_ASSOC);
-                if (empty($rooms)) {
-                    echo "<tr><td colspan='4'>No room types available.</td></tr>";
-                }
-                foreach ($rooms as $room) {
-                    echo "<tr>
-                            <td>{$room['type_name']}</td>
-                            <td>{$room['capacity']}</td>
-                            <td>{$room['equipments']}</td>
-                            <td>
-                                <a href='room_management.php?edit_room_id={$room['class_type_id']}#room_management' class='btn btn-warning'>Edit</a>
-                                <form method='POST' style='display:inline;'>
-                                    <input type='hidden' name='entity' value='class_type'>
-                                    <input type='hidden' name='action' value='delete'>
-                                    <input type='hidden' name='room_id' value='{$room['class_type_id']}'>
-                                    <button type='submit' class='btn btn-danger' onclick='return confirm(\"Are you sure?\")'>Delete</button>
-                                </form>
-                            </td>
-                        </tr>";
-                }
-                ?>
-            </tbody>
-        </table>
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Capacity</th>
+            <th>Equipments</th>
+            <th>Image Preview</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $rooms = $pdo->query("SELECT * FROM class_type")->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($rooms)) {
+            echo "<tr><td colspan='5'>No room types available.</td></tr>";
+        }
+        foreach ($rooms as $room) {
+            // Initialize image path to null
+            $imagePath = null;
+            $imageFile = $room['image'];
+
+            if ($imageFile) {
+                // Check if the image exists in the 'image' directory
+                $imagePath = file_exists("image/$imageFile") ? "image/$imageFile" : null;
+            }
+            
+            // Set the image preview HTML (fallback to "No Image" if not found)
+            $imageTag = $imagePath ? "<img src='$imagePath' alt='Image' width='100' height='75'>" : "No Image";
+
+            echo "<tr>
+                    <td>{$room['type_name']}</td>
+                    <td>{$room['capacity']}</td>
+                    <td>{$room['equipments']}</td>
+                    <td>{$imageTag}</td>
+                    <td>
+                        <a href='room_management.php?edit_room_id={$room['class_type_id']}#room_management' class='btn btn-warning'>Edit</a>
+                        <form method='POST' style='display:inline;'>
+                            <input type='hidden' name='entity' value='class_type'>
+                            <input type='hidden' name='action' value='delete'>
+                            <input type='hidden' name='room_id' value='{$room['class_type_id']}'>
+                            <button type='submit' class='btn btn-danger' onclick='return confirm(\"Are you sure?\")'>Delete</button>
+                        </form>
+                    </td>
+                </tr>";
+        }
+        ?>
+    </tbody>
+</table>
+
+
+
+
 
         <h2 id="class_management">Class Management</h2>
         <!-- Class Management Form -->
@@ -231,6 +324,7 @@ if (isset($_GET['edit_class_id'])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
 </body>
 
 </html>

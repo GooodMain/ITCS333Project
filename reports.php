@@ -3,65 +3,46 @@ session_start();
 
 // Ensure user is logged in
 if (!isset($_SESSION['user'])) {
-    header("Location: login.php"); // Redirect to login page if not logged in
+    header("Location: login.php");
     exit();
-}
-
-// Ensure that 'user_id' is set in session
-if (!isset($_SESSION['user_id'])) {
-    // If 'user_id' is not set, handle the error (redirect or set a default value)
-    $_SESSION['user_id'] = 1; // Manually set a user_id for testing (replace this with real logic)
-    // You could also redirect them to the login page, or handle it however you prefer:
-    // header("Location: login.php");
-    // exit();
 }
 
 // Fetch user information from session
 $userEmail = $_SESSION['user'];
-$userFullName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : 'Unknown User';
-$user_id = $_SESSION['user_id']; // Set $user_id from session
+$userFullName = $_SESSION['fullName'] ?? 'Unknown User';
+$user_id = $_SESSION['user_id'] ?? 1; // Default for testing; replace with actual logic
 
 // Include database connection
 require_once 'connection.php';
 
 // Functions to fetch data
 function getRoomUsageStats($pdo) {
-    $query = "SELECT c.class_num, COUNT(b.booking_id) AS booking_count
+    $query = "SELECT c.class_num, 
+                     COUNT(CASE WHEN b.booking_status = 'confirmed' THEN 1 END) AS confirmed_bookings,
+                     COUNT(CASE WHEN b.booking_status = 'cancelled' THEN 1 END) AS cancelled_bookings
               FROM classes c
               LEFT JOIN bookings b ON c.class_id = b.class_id
               GROUP BY c.class_id
-              ORDER BY booking_count DESC";
+              ORDER BY confirmed_bookings DESC";
     return $pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getUpcomingBookings($pdo, $user_id) {
+function getAllBookingsByStatus($pdo, $user_id, $status) {
     $query = "SELECT c.class_num, t.start_time, t.end_time, b.booking_date
               FROM bookings b
               JOIN classes c ON b.class_id = c.class_id
               JOIN time_slots t ON b.time_slot_id = t.time_slot_id
-              WHERE b.user_id = :user_id AND b.booking_date >= CURDATE()
-              ORDER BY b.booking_date, t.start_time";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute(['user_id' => $user_id]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-function getPastBookings($pdo, $user_id) {
-    $query = "SELECT c.class_num, t.start_time, t.end_time, b.booking_date
-              FROM bookings b
-              JOIN classes c ON b.class_id = c.class_id
-              JOIN time_slots t ON b.time_slot_id = t.time_slot_id
-              WHERE b.user_id = :user_id AND b.booking_date < CURDATE()
+              WHERE b.user_id = :user_id AND b.booking_status = :status
               ORDER BY b.booking_date DESC, t.start_time DESC";
     $stmt = $pdo->prepare($query);
-    $stmt->execute(['user_id' => $user_id]);
+    $stmt->execute(['user_id' => $user_id, 'status' => $status]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Fetch data
 $roomUsageStats = getRoomUsageStats($pdo);
-$upcomingBookings = getUpcomingBookings($pdo, $user_id);
-$pastBookings = getPastBookings($pdo, $user_id);
+$confirmedBookings = getAllBookingsByStatus($pdo, $user_id, 'confirmed');
+$cancelledBookings = getAllBookingsByStatus($pdo, $user_id, 'cancelled');
 ?>
 
 <!DOCTYPE html>
@@ -84,14 +65,16 @@ $pastBookings = getPastBookings($pdo, $user_id);
                 <thead>
                     <tr>
                         <th>Room</th>
-                        <th>Bookings</th>
+                        <th>Confirmed Bookings</th>
+                        <th>Cancelled Bookings</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($roomUsageStats as $room): ?>
                         <tr>
                             <td><?= htmlspecialchars($room['class_num']) ?></td>
-                            <td><?= htmlspecialchars($room['booking_count']) ?></td>
+                            <td><?= htmlspecialchars($room['confirmed_bookings']) ?></td>
+                            <td><?= htmlspecialchars($room['cancelled_bookings']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -99,9 +82,9 @@ $pastBookings = getPastBookings($pdo, $user_id);
             <canvas id="roomUsageChart"></canvas>
         </section>
 
-        <!-- Upcoming Bookings -->
+        <!-- Confirmed Bookings -->
         <section class="mt-5">
-            <h2>Your Upcoming Bookings</h2>
+            <h2>Your Confirmed Bookings</h2>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -111,10 +94,10 @@ $pastBookings = getPastBookings($pdo, $user_id);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($upcomingBookings)): ?>
-                        <tr><td colspan="3">No upcoming bookings.</td></tr>
+                    <?php if (empty($confirmedBookings)): ?>
+                        <tr><td colspan="3">No confirmed bookings.</td></tr>
                     <?php else: ?>
-                        <?php foreach ($upcomingBookings as $booking): ?>
+                        <?php foreach ($confirmedBookings as $booking): ?>
                             <tr>
                                 <td><?= htmlspecialchars($booking['class_num']) ?></td>
                                 <td><?= htmlspecialchars($booking['booking_date']) ?></td>
@@ -126,9 +109,9 @@ $pastBookings = getPastBookings($pdo, $user_id);
             </table>
         </section>
 
-        <!-- Past Bookings -->
+        <!-- Cancelled Bookings -->
         <section class="mt-5">
-            <h2>Your Past Bookings</h2>
+            <h2>Your Cancelled Bookings</h2>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -138,10 +121,10 @@ $pastBookings = getPastBookings($pdo, $user_id);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($pastBookings)): ?>
-                        <tr><td colspan="3">No past bookings.</td></tr>
+                    <?php if (empty($cancelledBookings)): ?>
+                        <tr><td colspan="3">No cancelled bookings.</td></tr>
                     <?php else: ?>
-                        <?php foreach ($pastBookings as $booking): ?>
+                        <?php foreach ($cancelledBookings as $booking): ?>
                             <tr>
                                 <td><?= htmlspecialchars($booking['class_num']) ?></td>
                                 <td><?= htmlspecialchars($booking['booking_date']) ?></td>
@@ -162,13 +145,22 @@ $pastBookings = getPastBookings($pdo, $user_id);
             type: 'bar',
             data: {
                 labels: roomUsageData.map(item => item.class_num),
-                datasets: [{
-                    label: 'Bookings',
-                    data: roomUsageData.map(item => item.booking_count),
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
+                datasets: [
+                    {
+                        label: 'Confirmed Bookings',
+                        data: roomUsageData.map(item => item.confirmed_bookings),
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Cancelled Bookings',
+                        data: roomUsageData.map(item => item.cancelled_bookings),
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
             },
             options: {
                 responsive: true,

@@ -130,6 +130,7 @@
                 <?php if ($_SESSION['user_type'] === 'admin'): ?>
                     <li><a href="dashboard.php">Dashboard</a></li>
                     <li><a href="room_management.php">Room Management</a></li>
+                    <li><a href="user_management.php">User Management</a></li>
                 <?php endif; ?>
             </ul>
             <ul id="mobile-nav" class="sidenav">
@@ -141,6 +142,7 @@
                 <?php if ($_SESSION['user_type'] === 'admin'): ?>
                     <li><a href="dashboard.php">Dashboard</a></li>
                     <li><a href="room_management.php">Room Management</a></li>
+                    <li><a href="user_management.php">User Management</a></li>
                 <?php endif; ?>
                 <li><a href="logout.php">Logout</a></li>
             </ul>

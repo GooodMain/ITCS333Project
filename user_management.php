@@ -109,9 +109,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css">
+    
+    <style> 
+        a {
+            font-size: 15px !important; 
+        }
+
+        h4 {
+            font-size: 37.5px !important;
+        }
+    </style>
 </head>
+
 
 <body>
     <?php include("header.php"); ?>
@@ -121,22 +134,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         <!-- Add New User Form -->
         <h3>Add New User</h3>
-        <form method="POST" action="user_management.php">
+                <form method="POST" action="user_management.php">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="full_name" class="form-label">Full Name</label>
-                    <input type="text" id="full_name" name="full_name" class="form-control" required>
+                    <input type="text" id="full_name" name="full_name" class="form-control" value="<?= isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : '' ?>" required>
                 </div>
                 <div class="col-md-6">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="email" class="form-control" required>
+                    <input type="email" id="email" name="email" class="form-control" value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>" required>
                 </div>
             </div>
 
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="phoneNum" class="form-label">Phone Number</label>
-                    <input type="text" id="phoneNum" name="phoneNum" class="form-control" required>
+                    <input type="text" id="phoneNum" name="phoneNum" class="form-control" value="<?= isset($_POST['phoneNum']) ? htmlspecialchars($_POST['phoneNum']) : '' ?>" required>
                 </div>
                 <div class="col-md-6">
                     <label for="password" class="form-label">Password</label>
@@ -148,8 +161,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <div class="col-md-6">
                     <label for="user_type" class="form-label">User Type</label>
                     <select id="user_type" name="user_type" class="form-control" required>
-                        <option value="admin">Admin</option>
-                        <option value="user">User</option>
+                        <option value="admin" <?= isset($_POST['user_type']) && $_POST['user_type'] === 'admin' ? 'selected' : '' ?>>Admin</option>
+                        <option value="user" <?= isset($_POST['user_type']) && $_POST['user_type'] === 'user' ? 'selected' : '' ?>>User</option>
                     </select>
                 </div>
             </div>
@@ -157,47 +170,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <button type="submit" class="btn btn-success">Add User</button>
         </form>
 
+
         <!-- User Edit Form -->
         <?php if ($userToEdit): ?>
             <h3>Edit User</h3>
             <form method="POST" action="user_management.php">
-                <input type="hidden" name="action" value="edit">
-                <input type="hidden" name="user_id" value="<?= $userToEdit['user_id'] ?>">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="user_id" value="<?= $userToEdit['user_id'] ?>">
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="full_name" class="form-label">Full Name</label>
-                        <input type="text" id="full_name" name="full_name" class="form-control" value="<?= $userToEdit['fullName'] ?>" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" id="email" name="email" class="form-control" value="<?= $userToEdit['email'] ?>" required>
-                    </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="full_name" class="form-label">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" class="form-control" value="<?= isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : htmlspecialchars($userToEdit['fullName']) ?>" required>
                 </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="phoneNum" class="form-label">Phone Number</label>
-                        <input type="text" id="phoneNum" name="phoneNum" class="form-control" value="<?= $userToEdit['phoneNum'] ?>" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" id="password" name="password" class="form-control">
-                    </div>
+                <div class="col-md-6">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : htmlspecialchars($userToEdit['email']) ?>" required>
                 </div>
+            </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="user_type" class="form-label">User Type</label>
-                        <select id="user_type" name="user_type" class="form-control" required>
-                            <option value="admin" <?= $userToEdit['user_type'] === 'admin' ? 'selected' : '' ?>>Admin</option>
-                            <option value="user" <?= $userToEdit['user_type'] === 'user' ? 'selected' : '' ?>>User</option>
-                        </select>
-                    </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="phoneNum" class="form-label">Phone Number</label>
+                    <input type="text" id="phoneNum" name="phoneNum" class="form-control" value="<?= isset($_POST['phoneNum']) ? htmlspecialchars($_POST['phoneNum']) : htmlspecialchars($userToEdit['phoneNum']) ?>" required>
                 </div>
+                <div class="col-md-6">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control">
+                </div>
+            </div>
 
-                <button type="submit" class="btn btn-warning">Update User</button>
-            </form>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="user_type" class="form-label">User Type</label>
+                    <select id="user_type" name="user_type" class="form-control" required>
+                        <option value="admin" <?= isset($_POST['user_type']) && $_POST['user_type'] === 'admin' ? 'selected' : ($userToEdit['user_type'] === 'admin' ? 'selected' : '') ?>>Admin</option>
+                        <option value="user" <?= isset($_POST['user_type']) && $_POST['user_type'] === 'user' ? 'selected' : ($userToEdit['user_type'] === 'user' ? 'selected' : '') ?>>User</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-warning">Update User</button>
+        </form>
+
         <?php endif; ?>
 
         <!-- User List -->
