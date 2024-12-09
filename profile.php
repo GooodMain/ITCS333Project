@@ -141,6 +141,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-primary:hover { background-color: #0056b3; }
         .form-text { color: #6c757d; }
         
+        a {
+            font-size: 15px !important; 
+        }
+
+        h4 {
+            font-size: 37.5px !important;
+        }
+    
     </style>
 </head>
 <body>
