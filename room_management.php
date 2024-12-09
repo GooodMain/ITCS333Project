@@ -20,8 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['entity']) && $_POST['
 
         
         // Handle image upload
-$imagePath = null;
-if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $imagePath = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     // Define constants
     $target_dir = "image/"; // Directory where images will be stored
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif']; // Allowed image types
@@ -63,6 +63,7 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $capacity = $_POST['capacity'];
         $equipments = $_POST['equipments'];
 
+        // Handle image upload for edits
         // Handle image upload for edits
         $imagePath = $roomToEdit['image']; // Keep existing image path if no new file is uploaded
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -312,6 +313,7 @@ if (isset($_GET['edit_class_id'])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
 </body>
 
 </html>
