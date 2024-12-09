@@ -13,7 +13,14 @@ if (!is_numeric($class_type_id) || !strtotime($booking_date)) {
 // Get classes of the selected type
 $db = $pdo->prepare("
     SELECT c.class_id, c.class_num, ts.time_slot_id, ts.start_time, ts.end_time,
-           EXISTS(SELECT 1 FROM bookings b WHERE b.class_id = c.class_id AND b.time_slot_id = ts.time_slot_id AND b.booking_date = ?) AS is_booked
+           EXISTS(
+               SELECT 1 
+               FROM bookings b 
+               WHERE b.class_id = c.class_id 
+                 AND b.time_slot_id = ts.time_slot_id 
+                 AND b.booking_date = ? 
+                 AND b.booking_status = 'confirmed'
+           ) AS is_booked
     FROM classes c
     CROSS JOIN time_slots ts
     WHERE c.class_type_id = ?
@@ -51,3 +58,4 @@ foreach ($results as $row) {
 }
 if ($currentClassId !== null) echo "</div>"; // Close last group's div
 ?>
+
