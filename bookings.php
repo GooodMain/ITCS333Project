@@ -20,20 +20,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $time_slot_id = $_POST['time_slot_id'];
     $booking_date = $_POST['booking_date'];
 
-    // Check if the time slot is already booked for the selected class and date
-    $db = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE class_id = ? AND time_slot_id = ? AND booking_date = ?");
-    $db->execute([$class_id, $time_slot_id, $booking_date]);
-    $isBooked = $db->fetchColumn();
-
-    if ($isBooked) {
-        $error = "The selected time slot is already booked.";
+    // Validate input
+    if (!is_numeric($class_id) || !is_numeric($time_slot_id) || !strtotime($booking_date)) {
+        $error = "Invalid input data.";
     } else {
-        // Insert the booking
-        $db = $pdo->prepare("INSERT INTO bookings (user_id, class_id, time_slot_id, booking_date) VALUES (?, ?, ?, ?)");
-        if ($db->execute([$user_id, $class_id, $time_slot_id, $booking_date])) {
-            $success = "Booking confirmed successfully!";
+        $selectedDate = new DateTime($booking_date);
+        $today = new DateTime('today');
+        $dayOfWeek = $selectedDate->format('N'); // 1 = Monday, ..., 7 = Sunday
+
+        if ($selectedDate < $today) {
+            $error = "You cannot book on a past date.";
+        } elseif ($dayOfWeek == 5 || $dayOfWeek == 6) { // 5 = Friday, 6 = Saturday
+            $error = "Bookings are not allowed on Fridays or Saturdays.";
         } else {
-            $error = "Failed to book. Please try again.";
+            // Check if the time slot is already booked for the selected class and date
+            $db = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE class_id = ? AND time_slot_id = ? AND booking_date = ?");
+            $db->execute([$class_id, $time_slot_id, $booking_date]);
+            $isBooked = $db->fetchColumn();
+
+            if ($isBooked) {
+                $error = "The selected time slot is already booked.";
+            } else {
+                // Insert the booking
+                if ($pdo->prepare("INSERT INTO bookings (user_id, class_id, time_slot_id, booking_date) VALUES (?, ?, ?, ?)")
+                        ->execute([$user_id, $class_id, $time_slot_id, $booking_date])) {
+                    $success = "Booking confirmed successfully!";
+                } else {
+                    $error = "Failed to book. Please try again.";
+                }
+            }
         }
     }
 }
@@ -79,32 +94,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
     <script>
-        document.getElementById('class_type').addEventListener('change', function () {
-            const classTypeId = this.value;
-            const bookingDate = document.getElementById('booking_date').value;
+        const bookingDateInput = document.getElementById('booking_date');
+        const classTypeDropdown = document.getElementById('class_type');
 
-            if (classTypeId && bookingDate) {
-                fetch(`book_slot.php?class_type_id=${classTypeId}&booking_date=${bookingDate}`)
-                    .then(response => response.text())
-                    .then(data => {
-                        document.getElementById('time-slots-container').innerHTML = data;
-                    });
+        // Set minimum date to today's date
+        const today = new Date().toISOString().split('T')[0];
+        bookingDateInput.setAttribute('min', today);
+
+        // Disable Fridays and Saturdays
+        bookingDateInput.addEventListener('change', function () {
+            const selectedDate = new Date(this.value);
+            const day = selectedDate.getUTCDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
+            if (day === 5 || day === 6) { // 5 = Friday, 6 = Saturday
+                alert("Bookings are not allowed on Fridays or Saturdays. Please select another date.");
+                this.value = ""; // Clear the invalid date
             }
         });
 
-        document.getElementById('booking_date').addEventListener('change', function () {
-            const classTypeId = document.getElementById('class_type').value;
-            const bookingDate = this.value;
+        // Fetch time slots dynamically when date or class type changes
+        document.querySelectorAll('#class_type, #booking_date').forEach(input => {
+            input.addEventListener('change', function () {
+                const classTypeId = classTypeDropdown.value;
+                const bookingDate = bookingDateInput.value;
 
-            if (classTypeId && bookingDate) {
-                fetch(`book_slot.php?class_type_id=${classTypeId}&booking_date=${bookingDate}`)
-                    .then(response => response.text())
-                    .then(data => {
-                        document.getElementById('time-slots-container').innerHTML = data;
-                    });
-            }
+                if (classTypeId && bookingDate) {
+                    fetch(`book_slot.php?class_type_id=${classTypeId}&booking_date=${bookingDate}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Failed to fetch time slots.');
+                            return response.text();
+                        })
+                        .then(data => {
+                            document.getElementById('time-slots-container').innerHTML = data;
+                        })
+                        .catch(error => {
+                            document.getElementById('time-slots-container').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+                        });
+                }
+            });
         });
     </script>
-    <?php include ("footer.php");?>
+    <?php include("footer.php"); ?>
 </body>
 </html>
