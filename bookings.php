@@ -1,13 +1,42 @@
 <?php
-require 'connection.php';
 session_start();
+require 'connection.php';
 
-// Check if the user is logged in
-if (!isset($_SESSION['user'])) {
-    echo "<div class='alert alert-danger'>You must be logged in to book a room.</div>";
-    exit;
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
 }
 
+// Fetch class types from the database
+$db = $pdo->prepare("SELECT * FROM class_type");
+$db->execute();
+$classTypes = $db->fetchAll(PDO::FETCH_ASSOC);
+
+// Handle booking submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $user_id = $_SESSION['user_id'];
+    $class_id = $_POST['class_id'];
+    $time_slot_id = $_POST['time_slot_id'];
+    $booking_date = $_POST['booking_date'];
+
+    // Check if the time slot is already booked for the selected class and date
+    $db = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE class_id = ? AND time_slot_id = ? AND booking_date = ?");
+    $db->execute([$class_id, $time_slot_id, $booking_date]);
+    $isBooked = $db->fetchColumn();
+
+    if ($isBooked) {
+        $error = "The selected time slot is already booked.";
+    } else {
+        // Insert the booking
+        $db = $pdo->prepare("INSERT INTO bookings (user_id, class_id, time_slot_id, booking_date) VALUES (?, ?, ?, ?)");
+        if ($db->execute([$user_id, $class_id, $time_slot_id, $booking_date])) {
+            $success = "Booking confirmed successfully!";
+        } else {
+            $error = "Failed to book. Please try again.";
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -15,126 +44,67 @@ if (!isset($_SESSION['user'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Booking System</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <title>Book a Class</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <?php include("header.php"); ?>
-
+<?php include("header.php"); ?>
     <div class="container mt-5">
-        <h1 class="text-center">Room Booking System</h1>
+        <h2 class="text-center">Book a Class</h2>
 
-        <form id="bookingForm" class="mt-4">
+        <!-- Display success or error messages -->
+        <?php if (!empty($success)): ?>
+            <div class="alert alert-success text-center"><?= htmlspecialchars($success) ?></div>
+        <?php elseif (!empty($error)): ?>
+            <div class="alert alert-danger text-center"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+
+        <form method="POST" id="booking-form" class="mt-4">
             <div class="mb-3">
-                <label for="date" class="form-label">Select Date:</label>
-                <input type="date" id="date" name="date" class="form-control" required>
+                <label for="booking_date" class="form-label">Select Date:</label>
+                <input type="date" id="booking_date" name="booking_date" class="form-control" required>
             </div>
-
             <div class="mb-3">
-    <label for="classType" class="form-label">Select Room Type:</label>
-    <select id="classType" name="classType" class="form-select" required>
-        <option value="">-- Select the type of class --</option>
-        <?php
-        // Fetch room types
-        $result = $pdo->query("SELECT * FROM class_type");
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-            echo "<option value='{$row['class_type_id']}'>{$row['type_name']}</option>";
-        }
-        ?>
-    </select>
-</div>
-
+                <label for="class_type" class="form-label">Class Type:</label>
+                <select id="class_type" name="class_type" class="form-control" required>
+                    <option value="" disabled selected>Select a class type</option>
+                    <?php foreach ($classTypes as $classType): ?>
+                        <option value="<?= $classType['class_type_id'] ?>"><?= htmlspecialchars($classType['type_name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
         </form>
 
-        <div id="availableclasses" class="mt-4"></div>
+        <div id="time-slots-container" class="mt-4"></div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="successModalLabel">Booking Confirmation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Successfully booked the time slot!
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-        $(document).ready(function () {
-            // Disable Fridays and Saturdays, and past dates
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            const minDate = today.toISOString().split("T")[0]; // Current date in YYYY-MM-DD format
+        document.getElementById('class_type').addEventListener('change', function () {
+            const classTypeId = this.value;
+            const bookingDate = document.getElementById('booking_date').value;
 
-            // Disable Fridays and Saturdays (5 and 6 are Friday and Saturday)
-            let disabledDays = [5, 6]; // Friday and Saturday
-            let disabledDates = [];
-
-            // Disable Fridays and Saturdays and past dates
-            $("#date").attr("min", minDate); // Disable past dates
-            $("#date").on("input", function () {
-                const selectedDate = new Date($(this).val());
-                const selectedDay = selectedDate.getDay();
-
-                // If selected day is Friday or Saturday, alert and reset to current date
-                if (disabledDays.includes(selectedDay)) {
-                    alert("You cannot select Fridays or Saturdays.");
-                    $(this).val(minDate);
-                }
-            });
-
-            // Fetch classes when room type and date are selected
-            $('#classType, #date').on('change', function () {
-                const date = $('#date').val();
-                const classType = $('#classType').val();
-
-                if (date && classType) {
-                    $.ajax({
-                        url: 'get_classes.php',
-                        type: 'GET',
-                        data: { date: date, classType: classType },
-                        success: function (data) {
-                            $('#availableclasses').html(data);
-                        }
+            if (classTypeId && bookingDate) {
+                fetch(`book_slot.php?class_type_id=${classTypeId}&booking_date=${bookingDate}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('time-slots-container').innerHTML = data;
                     });
-                }
-            });
+            }
+        });
 
-            // Book a time slot
-            $(document).on('click', '.time-slot', function () {
-                const timeSlotId = $(this).data('time-slot-id');
-                const classId = $(this).data('class-id');
-                const date = $('#date').val();
+        document.getElementById('booking_date').addEventListener('change', function () {
+            const classTypeId = document.getElementById('class_type').value;
+            const bookingDate = this.value;
 
-                $.ajax({
-                    url: 'book_slot.php',
-                    type: 'POST',
-                    data: { timeSlotId: timeSlotId, classId: classId, date: date },
-                    success: function (response) {
-                        if (response === 'success') {
-                            // Show success modal
-                            $('#successModal').modal('show');
-
-                            // Refresh the available classes and time slots
-                            $('#classType').trigger('change');
-                        } else {
-                            alert('Error booking the time slot. Please try again.');
-                        }
-                    }
-                });
-            });
+            if (classTypeId && bookingDate) {
+                fetch(`book_slot.php?class_type_id=${classTypeId}&booking_date=${bookingDate}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('time-slots-container').innerHTML = data;
+                    });
+            }
         });
     </script>
-    <?php include("footer.php"); ?>
+    <?php include ("footer.php");?>
 </body>
 </html>
