@@ -249,10 +249,6 @@ if (isset($_GET['edit_class_id'])) {
     </tbody>
 </table>
 
-
-
-
-
         <h2 id="class_management">Class Management</h2>
         <!-- Class Management Form -->
         <form method="POST" action="room_management.php#class_management" class="mb-4">

@@ -29,6 +29,8 @@ try {
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    
+
 
 <body>
     <?php include("header.php"); ?>
@@ -53,27 +55,24 @@ try {
                                 data-target="#modal-<?php echo $index; ?>">More Details</button>
 
                             <!-- Modal -->
-                            <div class="modal fade" id="modal-<?php echo $index; ?>" role="dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <div id="txt" style="float:left;"><img
-                                                src="image/<?php echo htmlspecialchars($room['image']); ?>"
-                                                style="width:450px; height:auto;" /></div>
-                                        <h4 class="modal-title"><?php echo htmlspecialchars($room['type_name']); ?></h4>
-                                        <br> <br> <br> <br>
-                                        <p>Details about this room:</p>
-                                        <br>
-                                        <p>Capacity: <?php echo htmlspecialchars($room['capacity']); ?></p>
-                                        <br>
-                                        <p>Equipments: <?php echo htmlspecialchars($room['equipments']); ?></p>
-                                        <br> <br>
-                                        <p>There are <?php echo htmlspecialchars($room['class_count']); ?> of this type in the IT college</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="modal" id="modal-<?php echo $index; ?>" role="dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div id="txt" style="float:left;">
+                <img src="image/<?php echo htmlspecialchars($room['image']); ?>" style="width:450px; height:auto;" />
+            </div>
+            <h4 class="modal-title"><?php echo htmlspecialchars($room['type_name']); ?></h4>
+            <p>Details about this room:</p>
+            <p><strong>Capacity:</strong> <?php echo htmlspecialchars($room['capacity']); ?></p>
+            <p><strong>Equipments:</strong> <?php echo htmlspecialchars($room['equipments']); ?></p>
+            <p>There are <?php echo htmlspecialchars($room['class_count']); ?> of this type in the IT college</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
                         </div>
                     </div>
                 </div>
