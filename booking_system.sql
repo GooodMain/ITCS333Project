@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 09, 2024 at 09:26 PM
+-- Generation Time: Dec 09, 2024 at 09:56 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,7 +33,7 @@ CREATE TABLE `bookings` (
   `class_id` int(11) NOT NULL,
   `time_slot_id` int(11) NOT NULL,
   `booking_date` date NOT NULL,
-  `booking_status` enum('Confirmed','Pending','Cancelled') DEFAULT 'Pending'
+  `booking_status` enum('confirmed','cancelled','expired') NOT NULL DEFAULT 'confirmed'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -41,8 +41,36 @@ CREATE TABLE `bookings` (
 --
 
 INSERT INTO `bookings` (`booking_id`, `user_id`, `class_id`, `time_slot_id`, `booking_date`, `booking_status`) VALUES
-(1, 12, 26, 2, '2024-12-24', 'Pending'),
-(2, 12, 26, 9, '2024-12-24', 'Pending');
+(1, 7, 14, 1, '2024-12-10', 'confirmed'),
+(6, 7, 26, 1, '2024-12-10', 'confirmed'),
+(8, 7, 14, 2, '2024-12-09', 'expired'),
+(11, 7, 14, 2, '2024-12-10', 'confirmed'),
+(12, 7, 26, 10, '2024-12-09', 'expired'),
+(13, 7, 15, 3, '2024-12-09', 'expired'),
+(14, 7, 26, 10, '2024-12-10', 'cancelled'),
+(15, 7, 26, 1, '2024-12-19', 'cancelled'),
+(16, 7, 26, 1, '2024-12-19', 'confirmed'),
+(18, 7, 14, 3, '2024-12-10', 'confirmed'),
+(19, 7, 26, 4, '2024-12-09', 'expired'),
+(20, 7, 14, 5, '2024-12-10', 'confirmed'),
+(21, 7, 17, 2, '2024-12-10', 'confirmed'),
+(22, 7, 26, 10, '2024-12-31', 'cancelled'),
+(23, 7, 26, 10, '2024-12-31', 'cancelled'),
+(24, 7, 26, 10, '2024-12-31', 'cancelled'),
+(25, 7, 26, 10, '2024-12-31', 'cancelled'),
+(26, 7, 26, 10, '2024-12-31', 'cancelled'),
+(27, 7, 26, 10, '2024-12-31', 'cancelled'),
+(28, 7, 26, 10, '2024-12-31', 'cancelled'),
+(29, 7, 26, 10, '2024-12-31', 'cancelled'),
+(30, 7, 26, 10, '2024-12-31', 'cancelled'),
+(31, 7, 26, 10, '2024-12-31', 'cancelled'),
+(32, 7, 26, 1, '2024-12-11', 'confirmed'),
+(33, 7, 26, 3, '2024-12-10', 'confirmed'),
+(34, 7, 26, 10, '2024-12-31', 'cancelled'),
+(35, 7, 26, 10, '2024-12-31', 'cancelled'),
+(36, 7, 26, 10, '2024-12-31', 'cancelled'),
+(37, 7, 26, 10, '2024-12-17', 'confirmed'),
+(38, 7, 26, 10, '2024-12-31', 'cancelled');
 
 -- --------------------------------------------------------
 
@@ -73,9 +101,7 @@ INSERT INTO `classes` (`class_id`, `class_num`, `class_type_id`) VALUES
 (23, 'Lab 40', 3),
 (24, 'Open Lab 1', 4),
 (25, 'Open Lab 2', 4),
-(26, 'Benefit La', 1),
-(29, 'Lab 50', 3),
-(36, 'Class 2006', 2);
+(26, 'Benefit La', 1);
 
 --
 -- Triggers `classes`
@@ -135,10 +161,9 @@ CREATE TABLE `class_type` (
 
 INSERT INTO `class_type` (`class_type_id`, `type_name`, `capacity`, `equipments`, `image`, `class_count`) VALUES
 (1, 'Benefit Lab', '30-40 students', '30-40 PC\'s and one projector ', 'benefit.jpg', 1),
-(2, 'Class Room', '50-60 students', 'one PC, one projector and one white board.', 'class.jpg', 7),
-(3, 'Lab Room', '30-40 students', '30-40 PC\'s, one projector and one white board.', 'lab.jpg', 5),
-(4, 'Open Lab Area', '130-150 students', '60-70 PC\'s, one projector and two white boards, one microphone and speakers', 'open.jpg', 2),
-(29, 'CLASS5', '15', '15', NULL, 0);
+(2, 'Class Room', '50-60 students', 'one PC, one projector and one white board.', 'class.jpg', 6),
+(3, 'Lab Room', '30-40 students', '30-40 PC\'s, one projector and one white board.', 'lab.jpg', 4),
+(4, 'Open Lab Area', '130-150 students', '60-70 PC\'s, one projector and two white boards, one microphone and speakers', 'open.jpg', 2);
 
 -- --------------------------------------------------------
 
@@ -189,14 +214,13 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`user_id`, `email`, `fullName`, `phoneNum`, `password`, `user_type`, `profile_picture`) VALUES
-(1, '', 'Maryam Husainn', '11111111', '$2y$10$99R48JdubD.51zBRuDri6uTMnjEqhcB9718/rIpq5Hy8hMwKd251O', '', 'uploads/675708d2d2cda.jpg'),
+(1, '202011514@stu.uob.edu.bh', 'Maryam Husain', '39565657', '$2y$10$99R48JdubD.51zBRuDri6uTMnjEqhcB9718/rIpq5Hy8hMwKd251O', '', 'Unknown.png'),
 (2, '202011585@stu.uob.edu.bh', 'Mohammed Alhusaini', '+973 33414205', '$2y$10$u/rHU4xekWINDFKUitkwdueipn4Od.XZH4FKMHWhnPZ5cGBsLwpWq', '', 'Unknown.png'),
 (3, '202100111@stu.uob.edu.bh', 'pass:123-Admin', '33333333', '123-Admin', 'admin', 'Unknown.png'),
 (4, '202100863@stu.uob.edu.bh', 'ASMA', '32217880', '$2y$10$1eGP1se39abCMzixLxMevu8kRqWXXWymElNAHwnVmfFnS1Xr45Roy', '', 'Unknown.png'),
 (5, 'salehmohmd@uob.edu.bh', 'Saleh Mohammed', '0097333695821', '$2y$10$z93bf6mdgNDN9lxGDXA9eORqqIR46OCPuT/TxZ6L6jrg0C37d0PT2', '', 'Unknown.png'),
 (6, '202102021@stu.uob.edu.bh', 'haya', '33221155', '$2y$10$Y36125.7YRMGTcEehM4U/O8zQWi.9wqvwr3.U//9UeLkMsvwS/4ma', '', 'Unknown.png'),
-(12, '202009537@stu.uob.edu.bh', 'Salman Alhawaj', '33333333', '$2y$10$Ycq0jiXIg2igX2N7o0l2R.LV8F97Iep.8zsjzNthLnvG54M0KAyVa', 'admin', 'image/67572c65bd8c3.jpg'),
-(15, '202003214@stu.uob.edu.bh', 'Salman Alhawaj', '33333333', '$2y$10$v3aiM0IeJR7GQ.AYF6FQXOUPy5N5H3j2/XUQ/DTP876UqgB4eOmxa', 'admin', 'Unknown.png');
+(7, '202103399@stu.uob.edu.bh', 'Hussain Salah', '39561188', '$2y$10$1.yh5ZpF8oUJnyJBYn66je/awjLC5rzTacmCOmV1PAZaCz.9qqj3q', 'admin', 'Unknown.png');
 
 --
 -- Indexes for dumped tables
@@ -245,19 +269,19 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `class_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `class_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `class_type`
 --
 ALTER TABLE `class_type`
-  MODIFY `class_type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `class_type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `time_slots`
@@ -269,7 +293,7 @@ ALTER TABLE `time_slots`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `user_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
