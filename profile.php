@@ -127,7 +127,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
         body { background-color: #f8f9fa; font-family: 'Arial', sans-serif; }
         .container { margin-top: 50px; max-width: 600px; }
@@ -138,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-primary { background-color: #007bff; border: none; }
         .btn-primary:hover { background-color: #0056b3; }
         .form-text { color: #6c757d; }
+        
     </style>
 </head>
 <body>
