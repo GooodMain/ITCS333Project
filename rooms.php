@@ -10,8 +10,8 @@ if (!isset($_SESSION['user'])) {
 include 'connection.php';
 
 
-    $result = $pdo->query('SELECT * FROM class_type');
-    $class = $result->fetchAll(PDO::FETCH_ASSOC);
+$result = $pdo->query('SELECT * FROM class_type');
+$class = $result->fetchAll(PDO::FETCH_ASSOC);
 
 // Check if a search term is set
 $searchTerm = '';
@@ -121,35 +121,42 @@ $current_date = date('Y-m-d');
 
                             <!-- Modal -->
                             <div class="modal" id="modal-<?php echo $index; ?>" role="dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div id="txt" style="float:left;">
-                <img src="image/<?php echo htmlspecialchars($room['image']); ?>" style="width:450px; height:auto;" />
-            </div>
-            <h4 class="modal-title"><?php echo htmlspecialchars($room['type_name']); ?></h4>
-            <br><br><br><br><br>
-            <p>Details about this room:</p>
-            <br><br>
-            <p><strong>Capacity:</strong> <?php echo htmlspecialchars($room['capacity']); ?></p>
-            <br>
-            <p><strong>Equipments:</strong> <?php echo htmlspecialchars($room['equipments']); ?></p>
-            <br>
-            <p>There are <?php echo htmlspecialchars($room['class_count']); ?> of this type in the IT college</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
-    </div>
-</div>
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <div id="txt" style="float:left;">
+                                            <img src="image/<?php echo htmlspecialchars($room['image']); ?>"
+                                                style="width:450px; height:auto;" />
+                                        </div>
+                                        <h4 class="modal-title"><?php echo htmlspecialchars($room['type_name']); ?></h4>
+                                        <br><br><br><br><br>
+                                        <p>Details about this room:</p>
+                                        <br><br>
+                                        <p><strong>Capacity:</strong> <?php echo htmlspecialchars($room['capacity']); ?></p>
+                                        <br>
+                                        <p><strong>Equipments:</strong> <?php echo htmlspecialchars($room['equipments']); ?>
+                                        </p>
+                                        <br>
+                                        <p>There are <?php echo htmlspecialchars($room['class_count']); ?> of this type in
+                                            the IT college</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
                     </div>
                 </div>
-    <div class="container">
-        <form method="GET" action="rooms.php">
-            <div class="form-group">
-                <label for="search">Search by Class Number:</label>
-                <input type="text" name="search" id="search" class="form-control" value="<?php echo htmlspecialchars($searchTerm); ?>">
+            </div>
+        </div>
+        </div>
+        <div class="container">
+            <form method="GET" action="rooms.php">
+                <div class="form-group">
+                    <label for="search">Search by Class Number:</label>
+                    <input type="text" name="search" id="search" class="form-control"
+                        value="<?php echo htmlspecialchars($searchTerm); ?>">
                 <?php } ?>
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
@@ -196,7 +203,7 @@ $current_date = date('Y-m-d');
                 echo "<tr><td colspan='4'>No rooms available</td></tr>";
             } ?>
         </table>
-    </div>
+    
 
     <?php include("footer.php"); ?>
 </body>
