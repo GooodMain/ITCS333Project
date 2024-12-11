@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 09, 2024 at 09:56 PM
+-- Generation Time: Dec 11, 2024 at 11:40 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -70,7 +70,8 @@ INSERT INTO `bookings` (`booking_id`, `user_id`, `class_id`, `time_slot_id`, `bo
 (35, 7, 26, 10, '2024-12-31', 'cancelled'),
 (36, 7, 26, 10, '2024-12-31', 'cancelled'),
 (37, 7, 26, 10, '2024-12-17', 'confirmed'),
-(38, 7, 26, 10, '2024-12-31', 'cancelled');
+(38, 7, 26, 10, '2024-12-31', 'cancelled'),
+(39, 4, 26, 1, '2024-12-12', 'cancelled');
 
 -- --------------------------------------------------------
 
@@ -89,19 +90,68 @@ CREATE TABLE `classes` (
 --
 
 INSERT INTO `classes` (`class_id`, `class_num`, `class_type_id`) VALUES
-(14, 'Class 2000', 2),
-(15, 'Class 2001', 2),
-(16, 'Class 2002', 2),
-(17, 'Class 2003', 2),
-(18, 'Class 2004', 2),
-(19, 'Class 2005', 2),
-(20, 'Lab 10', 3),
-(21, 'Lab 20', 3),
-(22, 'Lab 30', 3),
-(23, 'Lab 40', 3),
-(24, 'Open Lab 1', 4),
-(25, 'Open Lab 2', 4),
-(26, 'Benefit La', 1);
+(14, '021', 3),
+(15, '023', 2),
+(16, '028', 2),
+(17, '029', 2),
+(18, '030', 3),
+(19, '032', 2),
+(20, '049', 2),
+(21, '051', 3),
+(22, '056', 2),
+(23, '057', 2),
+(24, '058', 3),
+(25, '060', 2),
+(26, '077', 2),
+(29, '079', 3),
+(30, '084', 2),
+(31, '085', 2),
+(32, '086', 3),
+(33, '088', 2),
+(34, '1006', 3),
+(35, '1008', 3),
+(36, '1010', 3),
+(37, '1011', 3),
+(38, '1012', 3),
+(39, '1014', 3),
+(40, '1043', 2),
+(41, '1045', 3),
+(42, '1047', 2),
+(43, '1048', 2),
+(44, '1050', 3),
+(45, '1052', 3),
+(46, '1081', 3),
+(47, '1083', 3),
+(48, '1085', 2),
+(49, '1086', 2),
+(50, '1087', 3),
+(51, '1089', 3),
+(52, '2005', 3),
+(53, '2007', 3),
+(54, '2008', 2),
+(55, '2010', 2),
+(56, '2011', 2),
+(57, '2012', 2),
+(58, '2013', 3),
+(59, '2015', 3),
+(60, '2043', 3),
+(61, '2045', 3),
+(62, '2046', 2),
+(63, '2048', 2),
+(64, '2049', 2),
+(65, '2050', 2),
+(66, '2051', 1),
+(67, '2053', 3),
+(68, '2081', 3),
+(69, '2083', 3),
+(70, '2084', 2),
+(71, '2086', 2),
+(72, '2087', 2),
+(73, '2088', 2),
+(74, '2089', 3),
+(75, '2091', 3),
+(76, '1002', 4),
+(77, '2001', 4);
 
 --
 -- Triggers `classes`
@@ -160,10 +210,10 @@ CREATE TABLE `class_type` (
 --
 
 INSERT INTO `class_type` (`class_type_id`, `type_name`, `capacity`, `equipments`, `image`, `class_count`) VALUES
-(1, 'Benefit Lab', '30-40 students', '30-40 PC\'s and one projector ', 'benefit.jpg', 1),
-(2, 'Class Room', '50-60 students', 'one PC, one projector and one white board.', 'class.jpg', 6),
-(3, 'Lab Room', '30-40 students', '30-40 PC\'s, one projector and one white board.', 'lab.jpg', 4),
-(4, 'Open Lab Area', '130-150 students', '60-70 PC\'s, one projector and two white boards, one microphone and speakers', 'open.jpg', 2);
+(1, 'Benefit Lab', '30', '10 PC\'s and one smart board', 'benefit.jpg', 1),
+(2, 'Class Room', '60', 'one PC, one projector and one white board.', 'class.jpg', 29),
+(3, 'Lab Room', '40', '30-40 PC\'s, one projector and one white board.', 'lab.jpg', 30),
+(4, 'Open Lab Area', '200', '60-70 PC\'s, one projector and two white boards, one microphone and speakers', 'open.jpg', 2);
 
 -- --------------------------------------------------------
 
@@ -269,13 +319,13 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `classes`
 --
 ALTER TABLE `classes`
-  MODIFY `class_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `class_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `class_type`
