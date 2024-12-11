@@ -9,9 +9,13 @@ if (!isset($_SESSION['user'])) {
 
 include 'connection.php';
 
-
-$result = $pdo->query('SELECT * FROM class_type');
-$class = $result->fetchAll(PDO::FETCH_ASSOC);
+// Fetch class types for the flexbox display
+try {
+    $result = $pdo->query('SELECT * FROM class_type');
+    $class_types = $result->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error fetching class types: " . $e->getMessage());
+}
 
 // Check if a search term is set
 $searchTerm = '';
@@ -19,12 +23,13 @@ if (isset($_GET['search'])) {
     $searchTerm = $_GET['search'];
 }
 
+// Fetch classes based on search term or get all classes
 try {
     if ($searchTerm) {
         $stmt = $pdo->prepare('SELECT class_num, type_name, capacity, equipments, image, class_id 
                                FROM classes 
                                JOIN class_type ON classes.class_type_id = class_type.class_type_id
-                               WHERE class_num LIKE :searchTerm');
+                               WHERE class_num LIKE :searchTerm OR type_name LIKE :searchTerm');
         $stmt->execute(['searchTerm' => '%' . $searchTerm . '%']);
     } else {
         $stmt = $pdo->prepare('SELECT class_num, type_name, capacity, equipments, image, class_id 
@@ -39,13 +44,13 @@ try {
 
 // Get the current date
 $current_date = date('Y-m-d');
-
 ?>
-<!DOCTYPE html>
-<html>
 
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Rooms</title>
+    <meta charset="UTF-8">
+    <title>Rooms and Class Types</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -56,14 +61,11 @@ $current_date = date('Y-m-d');
             border-collapse: collapse;
         }
 
-        table,
-        th,
-        td {
+        table, th, td {
             border: 1px solid black;
         }
 
-        th,
-        td {
+        th, td {
             padding: 10px;
             text-align: left;
         }
@@ -96,68 +98,62 @@ $current_date = date('Y-m-d');
             background-color: #337ab7;
             border-color: #2e6da4;
         }
-    </style>
-</head>
 
+        .container-flex {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .card {
+            width: 300px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .card img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+    <script>
+        function fillSearch(classType) {
+            document.getElementById('search').value = classType;
+            document.getElementById('searchForm').submit();
+        }
+    </script>
+</head>
 <body>
     <?php include("header.php"); ?>
+
+    <!-- Display class types in a flexbox layout -->
     <div class="container">
-        <h2 styles="position=center">Discover our Rooms</h2>
-        <div class="row">
-            <?php foreach ($class as $index => $room) { // Add an index for unique IDs ?>
-                <div class="col s6 md3">
-                    <div class="card z-depth-0">
-                        <div class="card-content center">
-                            <h6><?php echo htmlspecialchars($room['type_name']); ?></h6>
-                            <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap;"><img
-                                    src="image/<?php echo htmlspecialchars($room['image']); ?>"
-                                    style="width: 80%; height: 80%;" /></div>
-                        </div>
-
-                        <div class="card-action right-align">
-                            <!-- Button to trigger the modal -->
-                            <button type="button" class="btn btn-info btn-lg" data-toggle="modal"
-                                data-target="#modal-<?php echo $index; ?>">More Details</button>
-
-                            <!-- Modal -->
-                            <div class="modal" id="modal-<?php echo $index; ?>" role="dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <div id="txt" style="float:left;">
-                                            <img src="image/<?php echo htmlspecialchars($room['image']); ?>"
-                                                style="width:450px; height:auto;" />
-                                        </div>
-                                        <h4 class="modal-title"><?php echo htmlspecialchars($room['type_name']); ?></h4>
-                                        <br><br><br><br><br>
-                                        <p>Details about this room:</p>
-                                        <br><br>
-                                        <p><strong>Capacity:</strong> <?php echo htmlspecialchars($room['capacity']); ?></p>
-                                        <br>
-                                        <p><strong>Equipments:</strong> <?php echo htmlspecialchars($room['equipments']); ?>
-                                        </p>
-                                        <br>
-                                        <p>There are <?php echo htmlspecialchars($room['class_count']); ?> of this type in
-                                            the IT college</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
+        <h2>Discover Our Rooms</h2>
+        <div class="container-flex">
+            <?php foreach ($class_types as $index => $class_type) { ?>
+                <div class="card">
+                    <img src="image/<?php echo htmlspecialchars($class_type['image']); ?>" alt="<?php echo htmlspecialchars($class_type['type_name']); ?>">
+                    <h3><?php echo htmlspecialchars($class_type['type_name']); ?></h3>
+                    <p><strong>Capacity:</strong> <?php echo htmlspecialchars($class_type['capacity']); ?></p>
+                    <p><strong>Equipments:</strong> <?php echo htmlspecialchars($class_type['equipments']); ?></p>
+                    <p>There are <?php echo htmlspecialchars($class_type['class_count']); ?> of this type in the IT college</p>
+                    <!-- Button to trigger the search -->
+                    <button type="button" class="btn btn-info" onclick="fillSearch('<?php echo htmlspecialchars($class_type['type_name']); ?>')">Search</button>
                 </div>
-            </div>
+            <?php } ?>
         </div>
-        </div>
-        <div class="container">
-            <form method="GET" action="rooms.php">
-                <div class="form-group">
-                    <label for="search">Search by Class Number:</label>
-                    <input type="text" name="search" id="search" class="form-control"
-                        value="<?php echo htmlspecialchars($searchTerm); ?>">
-                <?php } ?>
+    </div>
+
+    <!-- Search and display rooms -->
+    <div class="container">
+        <form id="searchForm" method="GET" action="rooms.php">
+            <div class="form-group">
+                <label for="search">Search by Class Number or Class Type:</label>
+                <input type="text" name="search" id="search" class="form-control" value="<?php echo htmlspecialchars($searchTerm); ?>">
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
@@ -177,7 +173,7 @@ $current_date = date('Y-m-d');
                     echo "<td>" . htmlspecialchars($row["type_name"]) . "</td>";
 
                     // Fetch available time slots for the current date, including canceled bookings
-                    $stmt_slots = $pdo->prepare('SELECT time_slot_id, start_time, end_time 
+                    $stmt_slots = $pdo->prepare('SELECT time_slot_id, DATE_FORMAT(start_time, "%H:%i") AS start_time, DATE_FORMAT(end_time, "%H:%i") AS end_time 
                                                  FROM time_slots 
                                                  WHERE time_slot_id NOT IN (
                                                      SELECT time_slot_id 
@@ -203,9 +199,9 @@ $current_date = date('Y-m-d');
                 echo "<tr><td colspan='4'>No rooms available</td></tr>";
             } ?>
         </table>
-    
+    </div>
 
     <?php include("footer.php"); ?>
 </body>
-
 </html>
+
