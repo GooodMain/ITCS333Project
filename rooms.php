@@ -163,46 +163,51 @@ $current_date = date('Y-m-d');
         </form>
 
         <table>
-            <tr>
-                <th>Image</th>
-                <th>Class Number</th>
-                <th>Type</th>
-                <th>Available Time Slots</th>
-            </tr>
-            <?php if (count($rooms) > 0) {
-                foreach ($rooms as $row) {
-                    echo "<tr>";
-                    echo "<td><img src='image/" . htmlspecialchars($row["image"]) . "' alt='" . htmlspecialchars($row["type_name"]) . "'></td>";
-                    echo "<td>" . htmlspecialchars($row["class_num"]) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["type_name"]) . "</td>";
+    <tr>
+        <th>Image</th>
+        <th>Class Number</th>
+        <th>Type</th>
+        <th>Available Time Slots</th>
+        <th>Comments</th> 
+    </tr>
+    <?php if (count($rooms) > 0) {
+        foreach ($rooms as $row) {
+            echo "<tr>";
+            echo "<td><img src='image/" . htmlspecialchars($row["image"]) . "' alt='" . htmlspecialchars($row["type_name"]) . "'></td>";
+            echo "<td>" . htmlspecialchars($row["class_num"]) . "</td>";
+            echo "<td>" . htmlspecialchars($row["type_name"]) . "</td>";
 
-                    // Fetch available time slots for the current date, including canceled bookings
-                    $stmt_slots = $pdo->prepare('SELECT time_slot_id, start_time, end_time 
-                                                 FROM time_slots 
-                                                 WHERE time_slot_id NOT IN (
-                                                     SELECT time_slot_id 
-                                                     FROM bookings 
-                                                     WHERE class_id = :class_id AND booking_date = :current_date AND booking_status = "confirmed"
-                                                 )');
-                    $stmt_slots->execute(['class_id' => $row['class_id'], 'current_date' => $current_date]);
-                    $time_slots = $stmt_slots->fetchAll(PDO::FETCH_ASSOC);
+            // Fetch available time slots for the current date, including canceled bookings
+            $stmt_slots = $pdo->prepare('SELECT time_slot_id, start_time, end_time 
+                                         FROM time_slots 
+                                         WHERE time_slot_id NOT IN (
+                                             SELECT time_slot_id 
+                                             FROM bookings 
+                                             WHERE class_id = :class_id AND booking_date = :current_date AND booking_status = "confirmed"
+                                         )');
+            $stmt_slots->execute(['class_id' => $row['class_id'], 'current_date' => $current_date]);
+            $time_slots = $stmt_slots->fetchAll(PDO::FETCH_ASSOC);
 
-                    echo "<td>";
-                    if (count($time_slots) > 0) {
-                        foreach ($time_slots as $slot) {
-                            echo "<button class='btn btn-primary'>" . htmlspecialchars($slot["start_time"]) . " - " . htmlspecialchars($slot["end_time"]) . "</button> ";
-                        }
-                    } else {
-                        echo "No available time slots";
-                    }
-                    echo "</td>";
-
-                    echo "</tr>";
+            echo "<td>";
+            if (count($time_slots) > 0) {
+                foreach ($time_slots as $slot) {
+                    echo "<button class='btn btn-primary'>" . htmlspecialchars($slot["start_time"]) . " - " . htmlspecialchars($slot["end_time"]) . "</button> ";
                 }
             } else {
-                echo "<tr><td colspan='4'>No rooms available</td></tr>";
-            } ?>
-        </table>
+                echo "No available time slots";
+            }
+            echo "</td>";
+
+            // Add the "View Comments" button
+            echo "<td><a href='comments.php?class_id=" . htmlspecialchars($row["class_id"]) . "' class='btn btn-primary'>View Comments</a></td>";
+
+            echo "</tr>";
+        }
+    } else {
+        echo "<tr><td colspan='5'>No rooms available</td></tr>"; 
+    } ?>
+</table>
+
     
 
     <?php include("footer.php"); ?>
