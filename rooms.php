@@ -106,7 +106,7 @@ $current_date = date('Y-m-d');
         }
 
         .card {
-            width: 300px;
+            width: 23%;
             margin: 10px;
             border: 1px solid #ddd;
             padding: 10px;
@@ -131,7 +131,7 @@ $current_date = date('Y-m-d');
     <?php include("header.php"); ?>
 
     <!-- Display class types in a flexbox layout -->
-    <div class="container">
+    <div>
         <h2>Discover Our Rooms</h2>
         <div class="container-flex">
             <?php foreach ($class_types as $index => $class_type) { ?>
