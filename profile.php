@@ -129,26 +129,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Edit Profile</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
     
     <style>
-        body { background-color: #f8f9fa; font-family: 'Arial', sans-serif; }
-        .container { margin-top: 50px; max-width: 600px; }
-        .card { padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); background-color: #ffffff; }
-        .profile-pic { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #007bff; }
-        h2 { color: #007bff; margin-bottom: 20px; }
-        .form-label { font-weight: bold; color: #343a40; }
-        .btn-primary { background-color: #007bff; border: none; }
-        .btn-primary:hover { background-color: #0056b3; }
-        .form-text { color: #6c757d; }
-        
-        a {
-            font-size: 15px !important; 
-        }
+ body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
 
-        h4 {
-            font-size: 37.5px !important;
-        }
-    
+.container {
+    margin-top: 50px;
+    max-width: 600px;
+}
+
+.card {
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+.profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #007bff;
+}
+
+h2 {
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+.form-label {
+    font-weight: bold;
+    color: #343a40;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.form-text {
+    color: #6c757d;
+}
+
+/* Scope the link styles only to the card content */
+.container a {
+    font-size: 15px;
+}
+
+/* Ensure navbar links retain their original size and style */
+.nav-wrapper ul li a {
+    font-size: 14px !important; /* Consistent size for navbar links */
+    font-family: Arial, sans-serif !important;
+    color: white;
+    padding: 0 10px;
+}
+
     </style>
 </head>
 <body>
